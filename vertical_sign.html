@@ -2,133 +2,825 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="assets/blockforge.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockForge Vertical Sign Studio</title>
+    <title>Vertical Sign Studio - BlockForge | Build. Paint. Create.</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/STLExporter.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* Redundant #image-preview from copy-paste, can be removed */
-        #image-preview {
-            width: 100%;
-            height: 180px;
-            object-fit: contain;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: none;
-            border: 2px solid #eee;
-            background: #f8f8f8;
+        :root {
+            /* Light Theme (Default) */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-muted: #6c757d;
+            --text-inverted: #ffffff;
+            --accent-primary: #FF5722;
+            --accent-secondary: #1A4D6D;
+            --border-primary: #dee2e6;
+            --shadow-primary: rgba(0, 0, 0, 0.1);
+            --shadow-secondary: rgba(0, 0, 0, 0.15);
         }
-        :root { --navy: #0D2B3E; --steel: #1A4D6D; --orange: #FF5722; --white: #FFFFFF; }
-        * { box-sizing: border-box; }
+
+        .dark-mode {
+            /* Dark Theme */
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #999999;
+            --text-inverted: #121212;
+            --accent-primary: #FF7043;
+            --accent-secondary: #4FC3F7;
+            --border-primary: #444444;
+            --shadow-primary: rgba(0, 0, 0, 0.3);
+            --shadow-secondary: rgba(0, 0, 0, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body { 
             font-family: 'Work Sans', sans-serif; 
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
-            color: var(--navy); 
-            margin: 0; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
+            background: var(--bg-primary); 
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
         }
-        
-        /* Top Control Panel */
-        .controls-container { 
-            width: 100%; 
-            background: white; 
-            padding: 1.5rem 2rem; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
-            z-index: 101; /* Ensure it's above the nav bar */
+
+        /* Navigation */
+        .nav-hub {
+            background: var(--bg-secondary);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px var(--shadow-primary);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+
+        .nav-hub-title {
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            -webkit-user-select: none;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .nav-hub-title span {
+            color: var(--accent-primary);
+        }
+
+        .theme-toggle-btn {
+            background: transparent;
+            border: 2px solid var(--accent-primary);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--accent-primary);
+            transform: scale(1.1);
+        }
+
+        .nav-hub-btn {
+            background: transparent;
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+            padding: 8px 20px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+            min-height: 44px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-hub-btn:hover {
+            background: var(--accent-primary);
+            color: var(--text-inverted);
+            transform: translateY(-2px);
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #FF7043 100%);
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .page-header h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .page-header .tagline {
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .page-header .subtitle {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.6;
+            opacity: 0.85;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .workspace {
             display: grid;
-            grid-template-columns: 1fr 1fr 0.8fr; 
-            gap: 3rem;
-            align-items: start;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
         }
 
-        .col { display: flex; flex-direction: column; gap: 1rem; }
-        
-        .logo { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--navy); cursor: pointer; margin-bottom: 0.5rem; } /* This is now handled by partials */
-        .logo span { color: var(--orange); }
-        .badge { font-size: 0.7rem; font-weight: 700; background: #eee; padding: 4px 8px; border-radius: 4px; vertical-align: middle; margin-left: 10px; }
-        
-        label { display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        input[type="text"] { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 1.5rem; text-transform: uppercase; }
-        input[type="text"]:focus { border-color: var(--orange); outline: none; }
-        
-        .color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
-        .color-opt { width: 32px; height: 32px; border-radius: 6px; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .color-opt.active { border-color: var(--navy); transform: scale(1.15); }
+        @media (max-width: 968px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
 
-        .workspace { flex: 1; width: 100%; position: relative; background: #e0e0e0; overflow: hidden; }
-        #canvas-container { width: 100%; height: 100%; }
-        
-        .stats { background: var(--navy); color: white; padding: 15px; border-radius: 10px; font-family: 'Space Mono', monospace; font-size: 0.8rem; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;}
-        
-        @media (max-width: 900px) {
-            .controls-container { grid-template-columns: 1fr; gap: 1.5rem; height: auto; }
-            .workspace { height: 500px; }
+        /* Panels */
+        .panel {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--shadow-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        /* Configuration */
+        .config-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .config-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .config-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .config-group input {
+            padding: 0.75rem;
+            border: 2px solid var(--border-primary);
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .config-group input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+        }
+
+        .config-group input::placeholder {
+            color: var(--text-muted);
+            text-transform: none;
+        }
+
+        .char-counter {
+            font-size: 0.8rem;
+            text-align: right;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .char-counter.warning {
+            color: #dc3545;
+        }
+
+        /* Color Picker */
+        .color-picker-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .color-picker-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .color-picker-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            position: relative;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: var(--accent-primary);
+            transform: scale(1.05);
+        }
+
+        .color-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-option[data-name="White"].active::after {
+            color: var(--text-primary);
+        }
+
+        .color-name {
+            font-size: 0.75rem;
+            text-align: center;
+            margin-top: 0.25rem;
+            color: var(--text-muted);
+        }
+
+        /* Height Slider */
+        .height-control {
+            margin-top: 1rem;
+        }
+
+        .height-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .height-value {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-size: 1.1rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(255, 87, 34, 0.4);
+            transition: all 0.3s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(255, 87, 34, 0.4);
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #FF7043 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Space Mono', monospace;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dimensions {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Work Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #FF7043 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(255, 87, 34, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 87, 34, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        /* 3D Preview */
+        .preview-area {
+            position: relative;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-primary);
+            min-height: 600px;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-hint {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: 'Space Mono', monospace;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-primary);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Use Cases */
+        .use-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .use-case-card {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-primary);
+            transition: all 0.3s;
+        }
+
+        .use-case-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 6px 20px var(--shadow-primary);
+        }
+
+        .use-case-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .use-case-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Guide Section */
+        .guide-section {
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 3rem;
+            border: 2px solid var(--accent-primary);
+        }
+
+        .guide-section h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .guide-section h3::before {
+            content: '💡';
+        }
+
+        .guide-section ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .guide-section li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .guide-section strong {
+            color: var(--accent-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 3rem 1rem 2rem;
+            }
+            
+            .main-container {
+                padding: 0 1rem;
+            }
+            
+            .panel {
+                padding: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .use-cases {
+                grid-template-columns: 1fr;
+            }
+            
+            .color-options {
+                justify-content: center;
+            }
+            
+            .preview-area {
+                min-height: 400px;
+            }
         }
     </style>
-    <script src="assets/partials/partials-loader.js"></script>
 </head>
 <body>
-    <div data-partial="nav" data-tool-title="Vertical Sign Tool"></div>
-    <div class="controls-container">
-        <div class="col">
-            <div>
-                <span class="logo" onclick="location.href='index.html'">BLOCK<span>FORGE</span></span>
-                <span class="badge">VERTICAL SIGN</span>
-            </div>
-            <div>
-                <label>1. Enter Name</label>
-                <input type="text" id="text-input" placeholder="NAME" value="CEO" maxlength="10" oninput="generate()">
-            </div>
-            <div class="stats" id="stats-panel"></div>
-        </div>
-
-        <div class="col">
-            <div>
-                <label>2. Text Color</label>
-                <div class="color-picker" id="text-color-picker"></div>
-            </div>
-            <div>
-                <label>Background Wall</label>
-                <div class="color-picker" id="bg-color-picker"></div>
-            </div>
-        </div>
-
-        <div class="col" style="justify-content: space-between; height: 100%;">
-            <div>
-                <label>3. Height</label>
-                <div style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:600; margin-bottom:5px;">
-                    <span>Size</span>
-                    <span id="height-val" style="color:var(--orange)">3 Bricks</span>
-                </div>
-                <input type="range" id="height-slider" min="2" max="6" value="3" style="width:100%" oninput="generate()" title="Select sign height in bricks">
-            </div>
-
-            <div class="controls">
-                <button class="btn btn-outline" onclick="generateInstructions()">📄 Guide</button>
-                <button class="btn btn-primary" onclick="exportSTL()">💾 STL</button>
-            </div>
-        </div>
+    <!-- Navigation -->
+    <div class="nav-hub">
+        <button id="theme-toggle" class="theme-toggle-btn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+        <div class="nav-hub-title" onclick="location.href='index.html'">BLOCK<span>FORGE</span></div>
+        <a href="index.html" class="nav-hub-btn">← Home</a>
     </div>
 
-    <div class="workspace">
-        <div id="canvas-container"></div>
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="page-header-content">
+            <h1>Vertical Sign Studio</h1>
+            <p class="tagline">Create Standing 3D Text with Printable Baseplates</p>
+            <p class="subtitle">Generate self-standing 3D text signs with custom bases. Perfect for desk nameplates, office signage, and special occasions.</p>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="workspace">
+            <!-- Configuration Panel -->
+            <div class="panel">
+                <h2>Sign Configuration</h2>
+                
+                <div class="config-section">
+                    <div class="config-group">
+                        <label>Text Content (Max 10 characters)</label>
+                        <input type="text" id="text-input" placeholder="Enter text here" value="CEO" maxlength="10" oninput="generate()">
+                        <div class="char-counter" id="char-counter">
+                            <span id="char-count">3</span>/10 characters
+                        </div>
+                    </div>
+
+                    <div class="color-picker-section">
+                        <div class="color-picker-group">
+                            <div class="color-picker-label">Text Color</div>
+                            <div class="color-options" id="text-color-picker"></div>
+                        </div>
+                        
+                        <div class="color-picker-group">
+                            <div class="color-picker-label">Background Color</div>
+                            <div class="color-options" id="bg-color-picker"></div>
+                        </div>
+                    </div>
+
+                    <div class="height-control">
+                        <div class="height-label">
+                            <label>Sign Height</label>
+                            <span class="height-value" id="height-val">3 Bricks</span>
+                        </div>
+                        <input type="range" id="height-slider" min="2" max="6" value="3" oninput="generate()" title="Select sign height" placeholder="Sign height">
+                        <div class="help-text" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                            Taller signs are more visible but require more bricks.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="generate()">
+                        🔨 Generate Sign
+                    </button>
+                </div>
+
+                <div class="stats-panel" id="stats-panel">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="text-count">0</div>
+                            <div class="stat-label" id="text-label">Text Bricks</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="bg-count">0</div>
+                            <div class="stat-label" id="bg-label">Background</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="width-val">0</div>
+                            <div class="stat-label">Width (studs)</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="height-display">0</div>
+                            <div class="stat-label">Height (bricks)</div>
+                        </div>
+                    </div>
+                    <div class="dimensions" id="dimensions">
+                        Total Parts: <span id="total-parts">0</span>
+                    </div>
+                </div>
+
+                <div class="controls" style="margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="generateInstructions()">
+                        📄 Generate Instructions
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportSTL()">
+                        💾 Export STL Baseplate
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3D Preview Area -->
+            <div class="panel">
+                <h2>3D Preview</h2>
+                <div class="preview-area">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>Loading 3D Model...</div>
+                    </div>
+                    <div id="canvas-container"></div>
+                    <div class="preview-hint">🖱️ Drag to rotate • Scroll to zoom</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Use Cases -->
+        <div class="use-cases">
+            <div class="use-case-card">
+                <h3>🖥️ Office Desks</h3>
+                <p>Create professional nameplates for executives, managers, and team members.</p>
+            </div>
+            <div class="use-case-card">
+                <h3>🏢 Reception Areas</h3>
+                <p>Make welcome signs, company logos, and directional signage for visitors.</p>
+            </div>
+            <div class="use-case-card">
+                <h3>🎓 Awards & Recognition</h3>
+                <p>Design custom award plaques for employees, students, and special achievements.</p>
+            </div>
+            <div class="use-case-card">
+                <h3>🏠 Home Decor</h3>
+                <p>Create personalized family name signs for entryways and living spaces.</p>
+            </div>
+        </div>
+
+        <!-- Building Guide -->
+        <div class="guide-section">
+            <h3>Building Tips for Vertical Signs</h3>
+            <ul>
+                <li><strong>Start with the base:</strong> Build the foundation first for stability</li>
+                <li><strong>Layer by layer:</strong> Assemble from bottom to top following the printed guide</li>
+                <li><strong>Check alignment:</strong> Ensure each layer is properly aligned before adding the next</li>
+                <li><strong>Use printed baseplate:</strong> The STL export provides a custom-fit base for your sign</li>
+                <li><strong>Consider lighting:</strong> Add LED strips behind the sign for dramatic effect</li>
+            </ul>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 1rem;">
+                The STL baseplate can be 3D printed and provides a stable foundation. Use glue or double-sided tape to secure the brick sign to the baseplate.
+            </p>
+        </div>
     </div>
 
 <script>
-    // --- Config ---
-    const colors = [
-        { name: 'Red', hex: '#C91A09' }, { name: 'Blue', hex: '#0055BF' },
-        { name: 'Yellow', hex: '#F2CD37' }, { name: 'Black', hex: '#1B2A34' },
-        { name: 'White', hex: '#FFFFFF' }, { name: 'Grey', hex: '#A0A5A9' },
-        { name: 'Green', hex: '#237841' }, { name: 'Orange', hex: '#DA8540' }
-    ];
+    /* ---------- Theme Switching ---------- */
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-toggle').innerHTML = '☀️';
+            document.getElementById('theme-toggle').setAttribute('aria-label', 'Switch to light theme');
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.getElementById('theme-toggle').innerHTML = '🌙';
+            document.getElementById('theme-toggle').setAttribute('aria-label', 'Switch to dark theme');
+        }
+    };
 
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    });
+
+    /* ---------- Font Definition (5x5 Pixel Font) ---------- */
     const font = {
         'A': [[0,1,1,1,0],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1]],
         'B': [[1,1,1,1,0],[1,0,0,0,1],[1,1,1,1,0],[1,0,0,0,1],[1,1,1,1,0]],
@@ -159,14 +851,34 @@
         ' ': [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
     };
 
+    /* ---------- Colors ---------- */
+    const colors = [
+        { name: 'Black', hex: '#1B2A34' },
+        { name: 'White', hex: '#FFFFFF' },
+        { name: 'Red', hex: '#C91A09' },
+        { name: 'Blue', hex: '#0055BF' },
+        { name: 'Yellow', hex: '#F2CD37' },
+        { name: 'Green', hex: '#237841' },
+        { name: 'Orange', hex: '#FE8A18' },
+        { name: 'Gray', hex: '#A0A5A9' }
+    ];
+
     let scene, camera, renderer, textGroup;
-    let textColor = colors[3], bgColor = colors[4];
+    let textColor = colors[0]; // Black
+    let bgColor = colors[1];   // White
+    let isDragging = false;
+    let previousMousePosition = {x: 0, y: 0};
     let gridData = [];
 
+    /* ---------- Initialize ---------- */
     function init() {
         const container = document.getElementById('canvas-container');
+        
+        // Hide loading spinner
+        container.parentElement.querySelector('.loading').style.display = 'none';
+        
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xe0e0e0);
+        scene.background = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--bg-tertiary').trim());
 
         camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
         camera.position.set(0, 15, 35);
@@ -175,8 +887,10 @@
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
+        // Lights
         const ambient = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambient);
         const dir = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -184,201 +898,413 @@
         dir.castShadow = true;
         scene.add(dir);
 
-        buildColorPicker('text-color-picker', (c) => { textColor = c; generate(); }, 'Black');
-        buildColorPicker('bg-color-picker', (c) => { bgColor = c; generate(); }, 'White');
+        // Color pickers
+        buildColorPicker('text-color-picker', colors, 0, true);
+        buildColorPicker('bg-color-picker', colors, 1, false);
 
+        // Update character counter
+        updateCharCounter();
+        
+        // Generate initial sign
         generate();
+        
+        // Start animation loop
         animate();
+
+        // Add mouse controls
+        setupMouseControls();
     }
 
-    function buildColorPicker(id, callback, defaultName) {
-        const container = document.getElementById(id);
-        colors.forEach(c => {
-            let btn = document.createElement('div');
-            btn.className = 'color-opt';
-            btn.style.backgroundColor = c.hex;
-            btn.onclick = () => { 
-                Array.from(container.children).forEach(x => x.classList.remove('active'));
-                btn.classList.add('active');
-                callback(c); 
+    function buildColorPicker(containerId, colors, defaultIndex, isText) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        
+        colors.forEach((color, index) => {
+            const colorOption = document.createElement('div');
+            colorOption.className = 'color-option' + (index === defaultIndex ? ' active' : '');
+            colorOption.style.backgroundColor = color.hex;
+            colorOption.dataset.name = color.name;
+            colorOption.dataset.hex = color.hex;
+            
+            const nameSpan = document.createElement('div');
+            nameSpan.className = 'color-name';
+            nameSpan.textContent = color.name;
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'inline-block';
+            wrapper.style.textAlign = 'center';
+            wrapper.style.margin = '0 4px 4px 0';
+            wrapper.appendChild(colorOption);
+            wrapper.appendChild(nameSpan);
+            
+            wrapper.onclick = () => {
+                if (isText) {
+                    textColor = color;
+                } else {
+                    bgColor = color;
+                }
+                
+                document.querySelectorAll(`#${containerId} .color-option`).forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                colorOption.classList.add('active');
+                
+                generate();
             };
-            if(c.name === defaultName) btn.classList.add('active');
-            container.appendChild(btn);
+            
+            container.appendChild(wrapper);
         });
     }
 
+    function updateCharCounter() {
+        const text = document.getElementById('text-input').value;
+        const counter = document.getElementById('char-counter');
+        const count = document.getElementById('char-count');
+        
+        count.textContent = text.length;
+        
+        if (text.length >= 8) {
+            counter.classList.add('warning');
+        } else {
+            counter.classList.remove('warning');
+        }
+    }
+
+    function setupMouseControls() {
+        const canvas = renderer.domElement;
+        
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = {x: e.clientX, y: e.clientY};
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - previousMousePosition.x;
+            const deltaY = e.clientY - previousMousePosition.y;
+            
+            textGroup.rotation.y += deltaX * 0.01;
+            textGroup.rotation.x += deltaY * 0.01;
+            
+            previousMousePosition = {x: e.clientX, y: e.clientY};
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+        
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            camera.position.z += e.deltaY * 0.05;
+            camera.position.z = Math.max(15, Math.min(100, camera.position.z));
+        });
+        
+        // Prevent context menu
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
+
+    /* ---------- Generate Sign ---------- */
     function generate() {
         const text = document.getElementById('text-input').value.toUpperCase() || " ";
         const height = parseInt(document.getElementById('height-slider').value);
+        
+        // Update display
         document.getElementById('height-val').textContent = height + " Bricks";
-
-        if(textGroup) scene.remove(textGroup);
+        updateCharCounter();
+        
+        // Remove old text group
+        if (textGroup) {
+            scene.remove(textGroup);
+            // Dispose of geometries and materials to prevent memory leaks
+            textGroup.traverse((child) => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach(material => material.dispose());
+                    } else {
+                        child.material.dispose();
+                    }
+                }
+            });
+        }
+        
         textGroup = new THREE.Group();
-
+        
         // 1. Build 2D Grid
         let grid = [];
-        let rows = 5;
-        for(let i=0; i<rows; i++) grid[i] = [];
+        const rows = 5;
+        for(let i = 0; i < rows; i++) grid[i] = [];
+        
+        // Add letters with spacing
         for (let char of text) {
-            let map = font[char] || font[' '];
-            if(!map) map = font[' '];
-            for(let r=0; r<rows; r++) { grid[r] = grid[r].concat(map[r]); grid[r].push(0); }
+            let letterMap = font[char] || font[' '];
+            if (!letterMap) letterMap = font[' '];
+            
+            for(let r = 0; r < rows; r++) {
+                grid[r] = grid[r].concat(letterMap[r]);
+                grid[r].push(0); // Add spacing
+            }
         }
-        for(let r=0; r<rows; r++) grid[r].pop();
-
+        
+        // Remove last spacing
+        for(let r = 0; r < rows; r++) {
+            if (grid[r].length > 0) {
+                grid[r].pop();
+            }
+        }
+        
         const padding = 2;
-        const totalW = grid[0].length + (padding*2);
-        gridData = { grid, totalW, height, padding }; // Save for instructions
-
-        // 2. Build 3D
+        const totalW = grid[0] ? grid[0].length : 0;
+        const totalWidth = totalW + (padding * 2);
+        
+        // Save grid data for instructions
+        gridData = { grid, totalW: totalWidth, height, padding, rows };
+        
+        // 2. Build 3D Model
         const brickGeo = new THREE.BoxGeometry(1, 1.2, 1);
         const studGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.2, 16);
-        let tCount = 0, bCount = 0;
-
-        // Base
-        for(let x=0; x<totalW; x++) {
-            addBrick(x - totalW/2, 0, '#444');
-        }
-
-        // Wall
-        for(let r=0; r<rows; r++) {
-            const fontRow = (rows - 1) - r; // Flip for build up
-            const rowData = grid[fontRow];
-            let xPos = 0;
-            // Left Pad
-            for(let p=0; p<padding; p++) { addBrick(xPos - totalW/2, r+1, bgColor.hex); xPos++; bCount++; }
-            // Text
-            for(let x=0; x<rowData.length; x++) {
-                const isText = rowData[x] === 1;
-                // If height > 1, maybe extrude text? For now, flat wall for stability.
-                addBrick(xPos - totalW/2, r+1, isText ? textColor.hex : bgColor.hex);
-                xPos++;
-                if(isText) tCount++; else bCount++;
-            }
-            // Right Pad
-            for(let p=0; p<padding; p++) { addBrick(xPos - totalW/2, r+1, bgColor.hex); xPos++; bCount++; }
-        }
         
-        // Cap
-        for(let x=0; x<totalW; x++) {
-            addBrick(x - totalW/2, rows+1, bgColor.hex);
-            bCount++;
-        }
-
-        function addBrick(x, y, color) {
-            const mat = new THREE.MeshStandardMaterial({ color: color });
-            const mesh = new THREE.Mesh(brickGeo, mat);
-            mesh.position.set(x, y * 1.2, 0);
-            
-            const stud = new THREE.Mesh(studGeo, mat);
-            stud.position.set(0, 0.6 + 0.1, 0);
-            mesh.add(stud);
-            
-            mesh.castShadow = true; mesh.receiveShadow = true;
+        let textCount = 0;
+        let bgCount = 0;
+        
+        // Base layer (dark gray)
+        for(let x = 0; x < totalWidth; x++) {
+            const mesh = createBrick(x - totalWidth/2, 0, '#444444');
             textGroup.add(mesh);
         }
-
+        bgCount += totalWidth;
+        
+        // Text and background layers
+        for(let r = 0; r < rows; r++) {
+            const fontRow = (rows - 1) - r; // Flip for building up
+            const rowData = grid[fontRow] || [];
+            let xPos = 0;
+            
+            // Left padding
+            for(let p = 0; p < padding; p++) {
+                const mesh = createBrick(xPos - totalWidth/2, r + 1, bgColor.hex);
+                textGroup.add(mesh);
+                xPos++;
+                bgCount++;
+            }
+            
+            // Text
+            for(let x = 0; x < rowData.length; x++) {
+                const isText = rowData[x] === 1;
+                const color = isText ? textColor.hex : bgColor.hex;
+                const mesh = createBrick(xPos - totalWidth/2, r + 1, color);
+                textGroup.add(mesh);
+                xPos++;
+                
+                if (isText) textCount++;
+                else bgCount++;
+            }
+            
+            // Right padding
+            for(let p = 0; p < padding; p++) {
+                const mesh = createBrick(xPos - totalWidth/2, r + 1, bgColor.hex);
+                textGroup.add(mesh);
+                xPos++;
+                bgCount++;
+            }
+        }
+        
+        // Cap layer
+        for(let x = 0; x < totalWidth; x++) {
+            const mesh = createBrick(x - totalWidth/2, rows + 1, bgColor.hex);
+            textGroup.add(mesh);
+            bgCount++;
+        }
+        
         scene.add(textGroup);
         
-        // Stats
-        document.getElementById('stats-panel').innerHTML = `
-            <div class="stat-row"><span>Width:</span> <span>${totalW} studs</span></div>
-            <div class="stat-row"><span>Height:</span> <span>${rows+2} bricks</span></div>
-            <div class="stat-row"><span>${textColor.name}:</span> <span>${tCount}</span></div>
-            <div class="stat-row"><span>${bgColor.name}:</span> <span>${bCount}</span></div>
-            <div class="stat-total">Total Parts: ${tCount + bCount + totalW}</div>
-        `;
-
-        camera.position.set(0, 10, Math.max(25, totalW));
+        // Update stats
+        const totalParts = textCount + bgCount + totalWidth;
+        document.getElementById('text-count').textContent = textCount;
+        document.getElementById('text-label').textContent = textColor.name;
+        document.getElementById('bg-count').textContent = bgCount;
+        document.getElementById('bg-label').textContent = bgColor.name;
+        document.getElementById('width-val').textContent = totalWidth;
+        document.getElementById('height-display').textContent = rows + 2;
+        document.getElementById('total-parts').textContent = totalParts;
+        
+        // Adjust camera based on sign size
+        camera.position.z = Math.max(25, totalWidth * 1.5);
     }
 
-    function animate() { requestAnimationFrame(animate); renderer.render(scene, camera); }
+    function createBrick(x, y, color) {
+        const material = new THREE.MeshStandardMaterial({ color: color });
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1.2, 1), material);
+        mesh.position.set(x, y * 1.2, 0);
+        
+        // Add stud
+        const stud = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.25, 0.25, 0.2, 16),
+            material
+        );
+        stud.position.set(0, 0.7, 0);
+        mesh.add(stud);
+        
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        
+        return mesh;
+    }
 
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+
+    /* ---------- Export Functions ---------- */
     function exportSTL() {
+        if (!textGroup) {
+            alert("Please generate a sign first.");
+            return;
+        }
+        
         const exporter = new THREE.STLExporter();
         const str = exporter.parse(textGroup);
+        const text = document.getElementById('text-input').value || 'sign';
         const blob = new Blob([str], { type: 'text/plain' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `Sign_${document.getElementById('text-input').value}.stl`;
+        link.download = `blockforge-sign-${text.toLowerCase()}.stl`;
         link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 100);
     }
 
     function generateInstructions() {
-        // Generate a visual guide using canvas
-        const win = window.open('', '_blank');
+        if (!gridData || !gridData.grid) {
+            alert("Please generate a sign first.");
+            return;
+        }
+        
         const d = gridData;
+        const text = document.getElementById('text-input').value || 'SIGN';
+        const win = window.open('', '_blank');
         
         let layersHTML = '';
+        const rows = 5;
         
-        // Helper to draw a row to base64
-        function drawRow(rowIndex, rowData) {
-            const cv = document.createElement('canvas');
-            const studS = 20;
-            cv.width = d.totalW * studS; cv.height = studS;
-            const ctx = cv.getContext('2d');
+        // Build instructions for each layer
+        for(let r = 0; r < rows; r++) {
+            const fontRow = (rows - 1) - r;
+            const rowData = d.grid[fontRow] || [];
             
-            let xPos = 0;
-            // Pad
-            ctx.fillStyle = bgColor.hex;
-            for(let p=0; p<d.padding; p++) { ctx.fillRect(xPos*studS, 0, studS, studS); ctx.strokeRect(xPos*studS, 0, studS, studS); xPos++; }
+            let rowHTML = '<div style="display: flex; justify-content: center; gap: 2px; margin: 10px 0;">';
             
-            // Text
-            for(let i=0; i<rowData.length; i++) {
-                ctx.fillStyle = rowData[i] === 1 ? textColor.hex : bgColor.hex;
-                ctx.fillRect(xPos*studS, 0, studS, studS);
-                ctx.strokeRect(xPos*studS, 0, studS, studS);
-                xPos++;
+            // Left padding
+            for(let p = 0; p < d.padding; p++) {
+                rowHTML += `<div style="width: 20px; height: 20px; background: ${bgColor.hex}; border: 1px solid #666;"></div>`;
             }
             
-            // Pad
-            ctx.fillStyle = bgColor.hex;
-            for(let p=0; p<d.padding; p++) { ctx.fillRect(xPos*studS, 0, studS, studS); ctx.strokeRect(xPos*studS, 0, studS, studS); xPos++; }
+            // Text
+            for(let i = 0; i < rowData.length; i++) {
+                const isText = rowData[i] === 1;
+                const color = isText ? textColor.hex : bgColor.hex;
+                rowHTML += `<div style="width: 20px; height: 20px; background: ${color}; border: 1px solid #666;"></div>`;
+            }
             
-            return cv.toDataURL();
-        }
-
-        // Build HTML for layers (Bottom Up)
-        const rows = 5;
-        for(let r=0; r<rows; r++) {
-            const fontRow = (rows - 1) - r;
-            const img = drawRow(r, d.grid[fontRow]);
+            // Right padding
+            for(let p = 0; p < d.padding; p++) {
+                rowHTML += `<div style="width: 20px; height: 20px; background: ${bgColor.hex}; border: 1px solid #666;"></div>`;
+            }
+            
+            rowHTML += '</div>';
+            
             layersHTML += `
-                <div style="margin-bottom:20px; border:1px solid #ccc; padding:10px; break-inside: avoid;">
-                    <h3>Layer ${r+2}</h3>
-                    <img src="${img}" style="width:100%; image-rendering: pixelated; border:1px solid #333;">
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <h3 style="margin-top: 0; color: #333;">Layer ${r + 2}</h3>
+                    ${rowHTML}
+                    <div style="font-size: 12px; color: #666; margin-top: 10px;">
+                        Place this row on top of Layer ${r + 1}
+                    </div>
                 </div>
             `;
         }
-
+        
         win.document.write(`
             <html>
-            <head><title>Sign Build Guide</title><style>body{font-family:sans-serif; max-width:800px; margin:0 auto; padding:20px;} h1{text-align:center; color:#333;}</style></head>
-            <body>            
-                <h1>Build Guide: ${document.getElementById('text-input').value.toUpperCase()}</h1>
-                <div style="background:#eee; padding:15px; border-radius:8px; margin-bottom:30px;">
-                    <strong>Parts List:</strong><br>
-                    ${document.getElementById('stats-panel').innerHTML}
+            <head>
+                <title>BlockForge Sign Build Guide</title>
+                <style>
+                    body { 
+                        font-family: 'Work Sans', sans-serif;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        background: white;
+                        color: #333;
+                    }
+                    h1 { 
+                        text-align: center; 
+                        color: #333;
+                        border-bottom: 3px solid #FF5722;
+                        padding-bottom: 10px;
+                    }
+                    .no-print { display: none; }
+                    @media print {
+                        .no-print { display: none; }
+                        button { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="no-print">
+                    <button onclick="window.print()" style="padding: 10px 20px; background: #FF5722; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 20px; font-weight: bold;">
+                        🖨️ Print Guide
+                    </button>
+                    <button onclick="window.close()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; margin-left: 10px;">
+                        ❌ Close
+                    </button>
                 </div>
-                <h2>Assembly (Bottom to Top)</h2>
-                <p><strong>Layer 1 (Base):</strong> ${d.totalW}x Dark Grey</p>
+                
+                <h1>BlockForge Sign Build Guide</h1>
+                <div style="background: linear-gradient(135deg, #FF5722 0%, #FF7043 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                    <h2 style="margin-top: 0; color: white;">"${text.toUpperCase()}"</h2>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <div><strong>Width:</strong> ${d.totalW} studs</div>
+                        <div><strong>Height:</strong> ${d.rows + 2} bricks</div>
+                        <div><strong>${textColor.name} Bricks:</strong> ${document.getElementById('text-count').textContent}</div>
+                        <div><strong>${bgColor.name} Bricks:</strong> ${document.getElementById('bg-count').textContent}</div>
+                    </div>
+                </div>
+                
+                <h2>Assembly Instructions (Bottom to Top)</h2>
+                <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin-top: 0;">Layer 1 (Base)</h3>
+                    <p>Build a solid base using ${d.totalW} dark gray bricks.</p>
+                </div>
+                
                 ${layersHTML}
-                <p><strong>Layer ${rows+2} (Cap):</strong> ${d.totalW}x ${bgColor.name}</p>
-                <div style="text-align:center; margin-top:50px; color:#888;">Generated by BlockForgeStudio.com</div>
+                
+                <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                    <h3 style="margin-top: 0;">Layer ${d.rows + 2} (Cap)</h3>
+                    <p>Add a final layer of ${d.totalW} ${bgColor.name} bricks to finish the top.</p>
+                </div>
+                
+                <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; text-align: center; color: #666; font-size: 14px;">
+                    <p>Generated by BlockForge Studio • blockforgestudio.com</p>
+                    <p>Need help? Visit our support page for building tips and techniques.</p>
+                </div>
             </body>
             </html>
         `);
         win.document.close();
-        setTimeout(() => win.print(), 500);
     }
 
+    // Handle window resize
     window.addEventListener('resize', () => {
-        camera.aspect = document.getElementById('canvas-container').clientWidth / document.getElementById('canvas-container').clientHeight;
+        const container = document.getElementById('canvas-container');
+        camera.aspect = container.clientWidth / container.clientHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize(document.getElementById('canvas-container').clientWidth, document.getElementById('canvas-container').clientHeight);
+        renderer.setSize(container.clientWidth, container.clientHeight);
     });
 
-    init();
+    // Initialize on load
+    window.addEventListener('load', init);
 </script>
 </body>
 </html>
