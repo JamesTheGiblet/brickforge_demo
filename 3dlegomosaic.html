@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LEGO 3D Mosaic — Ultimate Builder</title>
+  <style>
+    :root{--bg:#121212;--card:#1e1e1e;--text:#eee;--accent:#00ff99;--border:#333}
+    body{font-family:Inter,system-ui,sans-serif; background:var(--bg);color:var(--text);margin:0;padding:20px;line-height:1.5}
+    h1{margin:0 0 8px;font-size:24px;color:#fff;font-weight:800}
+    h2{font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-top:0;color:var(--accent);margin-bottom:12px}
+    
+    .layout{display:grid;grid-template-columns:350px 1fr;gap:24px;max-width:1600px;margin:0 auto}
+    .card{background:var(--card);padding:20px;border-radius:12px;border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+    
+    label{display:block;margin:16px 0 8px;color:#888;font-size:12px;font-weight:600;text-transform:uppercase}
+    input[type=range]{width:100%;cursor:pointer;accent-color:var(--accent)}
+    
+    .checkbox-row{display:flex;align-items:center;gap:12px;margin:12px 0;background:#252525;padding:10px;border-radius:6px;border:1px solid #333}
+    .checkbox-row input{margin:0;width:16px;height:16px}
+    
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+    button{background:var(--accent);border:none;color:#000;padding:12px;border-radius:6px;cursor:pointer;font-weight:700;transition:all 0.2s}
+    button:hover{filter:brightness(1.1);transform:translateY(-1px)}
+    button.secondary{background:#333;color:#fff}
+    
+    canvas{width:100%;height:auto;border-radius:8px;background:#000;box-shadow:0 4px 20px rgba(0,0,0,0.5); margin-bottom: 20px;}
+    .preview-wrap{display:flex;flex-direction:column;gap:16px}
+    
+    /* Instruction Slides */
+    .instruction-slide {
+      background: white; color: black; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .instruction-header {
+      font-weight: bold; font-size: 18px; border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 10px; display:flex; justify-content:space-between; align-items: center;
+    }
+    .layer-canvas {
+      width: 100%; border: 1px solid #ccc; image-rendering: pixelated;
+    }
+    
+    .bom-scroll{max-height:400px;overflow-y:auto;border:1px solid #333;border-radius:6px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{text-align:left;background:#222;color:#fff;position:sticky;top:0;padding:10px}
+    td{border-bottom:1px solid #333;padding:8px;color:#ccc}
+    .color-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;border:1px solid rgba(255,255,255,0.2)}
+
+    @media (max-width: 900px) { .layout{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <h1>LEGO 3D Mosaic — Ultimate Builder</h1>
+  <div class="layout">
+    <div class="card">
+      <h2>1. Configuration</h2>
+      
+      <label>Source Image</label>
+      <input id="file" type="file" accept="image/*">
+      
+      <label>Mosaic Width</label>
+      <input id="width" type="range" min="16" max="64" value="32">
+      <div style="font-size:12px;color:#aaa;text-align:right"><span id="width-val">32</span> studs</div>
+
+      <label>Colors</label>
+      <input id="colors" type="range" min="2" max="32" value="16">
+      
+      <div style="background:#222;padding:12px;border-radius:8px;margin-top:16px;border:1px solid #333">
+        <label style="color:var(--accent);margin-top:0">3D Depth Settings</label>
+        
+        <div class="checkbox-row" style="margin-top:8px">
+          <input id="use3D" type="checkbox" checked>
+          <label for="use3D"><strong>Enable 3D Relief</strong></label>
+        </div>
+
+        <div class="checkbox-row">
+          <input id="invertDepth" type="checkbox" checked>
+          <label for="invertDepth"><strong>Invert Depth</strong><br><span style="font-size:11px;color:#bbb">Darker = Taller (Best for logos/text)</span></label>
+        </div>
+
+        <label>Max Height (Plates)</label>
+        <input id="maxHeight" type="range" min="1" max="10" value="6">
+        <div style="font-size:12px;color:#aaa;text-align:right"><span id="height-val">6</span> plates high</div>
+      </div>
+      
+      <div class="controls">
+        <button id="generate">GENERATE MODEL</button>
+      </div>
+      
+      <div style="margin-top:20px;border-top:1px solid #333;padding-top:20px">
+        <h2 style="margin-bottom:10px">Export</h2>
+        <div class="controls" style="margin-top:0">
+          <button id="downloadCSV" class="secondary">Parts List (CSV)</button>
+          <button id="printInstructions" class="secondary" style="background:#fff;color:#000">Print Instructions</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      
+      <div class="card">
+        <h2>2. 3D Preview</h2>
+        <canvas id="renderIso"></canvas>
+      </div>
+
+      <div class="card" id="instructions-card" style="display:none">
+        <h2>3. Building Steps (Preview)</h2>
+        <div id="instructions-container" style="max-height:500px;overflow-y:auto;background:#ccc;padding:10px;border-radius:6px">
+          </div>
+      </div>
+
+      <div class="card" id="bom-card" style="display:none">
+        <h2>Parts List</h2>
+        <div class="bom-scroll">
+          <table id="bom-table">
+            <thead><tr><th>Color</th><th>Stack Ht.</th><th>Qty</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// --- DB ---
+const LEGO_PALETTE = [
+  {name:"Black", hex:"#000000"}, {name:"White", hex:"#FFFFFF"},
+  {name:"Light Bluish Gray", hex:"#A0A5A9"}, {name:"Dark Bluish Gray", hex:"#6C6E68"},
+  {name:"Red", hex:"#FF0000"}, {name:"Dark Red", hex:"#720E0F"},
+  {name:"Coral", hex:"#FF5544"}, {name:"Magenta", hex:"#E3008C"},
+  {name:"Orange", hex:"#FF7700"}, {name:"Yellow", hex:"#FFD700"},
+  {name:"Neon Orange", hex:"#FF3300"}, {name:"Lime", hex:"#BBE90B"},
+  {name:"Blue", hex:"#0055BF"}, {name:"Dark Blue", hex:"#0A3463"},
+  {name:"Medium Azure", hex:"#36AEBF"}, {name:"Dark Azure", hex:"#078BC9"},
+  {name:"Purple", hex:"#81007B"}, {name:"Reddish Brown", hex:"#582A12"},
+  {name:"Tan", hex:"#E4CD9E"}, {name:"Dark Tan", hex:"#958A73"}
+];
+
+// --- STATE ---
+const el = id => document.getElementById(id);
+let imgBitmap = null;
+let lastResult = null;
+
+// --- LISTENERS ---
+['width','colors','maxHeight'].forEach(id => {
+  el(id).addEventListener('input', e => {
+    let suffix = id==='width'?' studs' : id==='maxHeight'?' plates':'';
+    if(el(id+'-val')) el(id+'-val').textContent = e.target.value + suffix;
+  });
+});
+
+el('file').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = () => { imgBitmap = img; URL.revokeObjectURL(url); };
+  img.src = url;
+});
+
+// --- CORE MATH ---
+function rgbToHsl(r, g, b) {
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h, s, l=(max+min)/2;
+  if(max===min){ h=s=0; } else {
+    const d=max-min;
+    s=l>0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d+(g<b?6:0); break;
+      case g: h=(b-r)/d+2; break;
+      case b: h=(r-g)/d+4; break;
+    }
+    h*=60;
+  }
+  return [h,s,l];
+}
+
+function hexToRgb(hex) {
+  const n=parseInt(hex.slice(1),16);
+  return [(n>>16)&255, (n>>8)&255, n&255];
+}
+
+function findBestColor(r,g,b) {
+  let best=null, minDiff=Infinity;
+  const [sH,sS,sL] = rgbToHsl(r,g,b);
+  for(const lego of LEGO_PALETTE) {
+    const [lr,lg,lb] = hexToRgb(lego.hex);
+    // Simple Euclidean distance works best for 3D mosaics to preserve contrast
+    const dist = Math.sqrt((r-lr)**2 + (g-lg)**2 + (b-lb)**2);
+    if(dist<minDiff){ minDiff=dist; best=lego; }
+  }
+  return best;
+}
+
+// --- GENERATOR ---
+async function generate() {
+  if(!imgBitmap) { alert("Please upload an image."); return; }
+  
+  const widthVal = parseInt(el('width').value);
+  const colorCount = parseInt(el('colors').value);
+  const is3D = el('use3D').checked;
+  const maxH = parseInt(el('maxHeight').value);
+  const invertDepth = el('invertDepth').checked;
+
+  // 1. Resize
+  const ratio = imgBitmap.height / imgBitmap.width;
+  const heightVal = Math.round(widthVal * ratio);
+  
+  const cvs = document.createElement('canvas');
+  cvs.width = widthVal; cvs.height = heightVal;
+  const ctx = cvs.getContext('2d');
+  ctx.drawImage(imgBitmap, 0, 0, widthVal, heightVal);
+  const idata = ctx.getImageData(0,0,widthVal,heightVal);
+  const pixels = idata.data;
+
+  // 2. Build Data
+  const bricks = [];
+  
+  for(let y=0; y<heightVal; y++) {
+    for(let x=0; x<widthVal; x++) {
+      const i = (y*widthVal + x)*4;
+      const r=pixels[i], g=pixels[i+1], b=pixels[i+2];
+      
+      const lego = findBestColor(r,g,b);
+      
+      // HEIGHT CALCULATION
+      let plates = 1;
+      if(is3D) {
+        let lum = (0.299*r + 0.587*g + 0.114*b) / 255; 
+        if(invertDepth) lum = 1.0 - lum;
+        plates = Math.max(1, Math.round(lum * maxH));
+      }
+      
+      bricks.push({
+        x: x, 
+        y: y, 
+        size: 1, 
+        height: plates,
+        color: lego.hex, 
+        name: lego.name
+      });
+    }
+  }
+
+  lastResult = { bricks, w:widthVal, h:heightVal, is3D, maxH };
+  
+  renderIso(bricks, widthVal, heightVal);
+  renderBOM(bricks);
+  generateInstructions(bricks, widthVal, heightVal, maxH);
+}
+
+// --- RENDER 3D ISO ---
+function renderIso(bricks, w, h) {
+  const cvs = el('renderIso');
+  
+  const tileW = 12; 
+  const tileH = 6;  
+  const plateH = 3; 
+  
+  cvs.width = (w + h) * tileW + 100;
+  cvs.height = (w + h) * tileH + (12 * plateH) + 100;
+  
+  const ctx = cvs.getContext('2d');
+  ctx.fillStyle = '#1a1a1a'; 
+  ctx.fillRect(0,0,cvs.width,cvs.height);
+  
+  const centerX = cvs.width / 2;
+  const topY = 50; 
+
+  for(let y=0; y<h; y++) {
+    for(let x=0; x<w; x++) {
+      const b = bricks[y*w + x]; 
+      
+      const screenX = centerX + (x - y) * tileW;
+      const screenY = topY + (x + y) * tileH;
+      
+      const totalH = b.height * plateH;
+      const color = b.color;
+      
+      // Side 1
+      ctx.fillStyle = adjustColor(color, -40); 
+      ctx.beginPath();
+      ctx.moveTo(screenX - tileW, screenY);
+      ctx.lineTo(screenX, screenY + tileH);
+      ctx.lineTo(screenX, screenY + tileH - totalH);
+      ctx.lineTo(screenX - tileW, screenY - totalH);
+      ctx.fill();
+
+      // Side 2
+      ctx.fillStyle = adjustColor(color, -20); 
+      ctx.beginPath();
+      ctx.moveTo(screenX + tileW, screenY);
+      ctx.lineTo(screenX, screenY + tileH);
+      ctx.lineTo(screenX, screenY + tileH - totalH);
+      ctx.lineTo(screenX + tileW, screenY - totalH);
+      ctx.fill();
+
+      // Top Face
+      ctx.fillStyle = color; 
+      ctx.beginPath();
+      ctx.moveTo(screenX, screenY - totalH - tileH);
+      ctx.lineTo(screenX + tileW, screenY - totalH);
+      ctx.lineTo(screenX, screenY - totalH + tileH);
+      ctx.lineTo(screenX - tileW, screenY - totalH);
+      ctx.fill();
+    }
+  }
+}
+
+function adjustColor(hex, amount) {
+  let [r,g,b] = hexToRgb(hex);
+  r = Math.max(0,Math.min(255, r+amount));
+  g = Math.max(0,Math.min(255, g+amount));
+  b = Math.max(0,Math.min(255, b+amount));
+  return '#' + ((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1);
+}
+
+// --- RULER INSTRUCTION GENERATOR ---
+function generateInstructions(bricks, w, h, maxH) {
+  const container = el('instructions-container');
+  container.innerHTML = '';
+  el('instructions-card').style.display = 'block';
+
+  const scale = 20; 
+  const pad = 30; // Padding for rulers
+
+  for(let layer = 1; layer <= maxH; layer++) {
+    const slide = document.createElement('div');
+    slide.className = 'instruction-slide';
+    
+    const head = document.createElement('div');
+    head.className = 'instruction-header';
+    head.innerHTML = `<span>Step ${layer}</span> <span style="font-size:14px; color:#666">Layer ${layer} of ${maxH}</span>`;
+    slide.appendChild(head);
+    
+    const layerCvs = document.createElement('canvas');
+    layerCvs.className = 'layer-canvas';
+    layerCvs.width = (w * scale) + pad;
+    layerCvs.height = (h * scale) + pad;
+    const ctx = layerCvs.getContext('2d');
+    
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0,0, layerCvs.width, layerCvs.height);
+    
+    ctx.translate(pad, pad);
+
+    let count = 0;
+    for(const b of bricks) {
+      if(b.height >= layer) {
+        ctx.fillStyle = b.color;
+        ctx.fillRect(b.x*scale, b.y*scale, scale, scale);
+        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(b.x*scale, b.y*scale, scale, scale);
+        count++;
+      } else {
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(b.x*scale, b.y*scale, scale, scale);
+        ctx.strokeStyle = '#e5e5e5';
+        ctx.strokeRect(b.x*scale, b.y*scale, scale, scale);
+      }
+    }
+
+    // --- DRAW RULERS ---
+    ctx.fillStyle = '#666';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Top Ruler
+    for(let i=0; i<=w; i+=5) { 
+        if(i===0) continue; 
+        ctx.fillText(i, i*scale, -10);
+        ctx.beginPath(); ctx.moveTo(i*scale, -5); ctx.lineTo(i*scale, h*scale); ctx.strokeStyle='rgba(0,0,0,0.1)'; ctx.stroke();
+    }
+    // Left Ruler
+    for(let j=0; j<=h; j+=5) {
+        if(j===0) continue;
+        ctx.fillText(j, -15, j*scale);
+        ctx.beginPath(); ctx.moveTo(-5, j*scale); ctx.lineTo(w*scale, j*scale); ctx.strokeStyle='rgba(0,0,0,0.1)'; ctx.stroke();
+    }
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    slide.appendChild(layerCvs);
+    
+    const desc = document.createElement('div');
+    desc.style.marginTop = "10px";
+    desc.innerHTML = `<span style="background:#eee; padding:4px 8px; border-radius:4px; font-size:12px"><strong>Parts needed:</strong> ${count} plates</span>`;
+    slide.appendChild(desc);
+    container.appendChild(slide);
+  }
+}
+
+// --- EXPORT & PRINT ---
+el('printInstructions').addEventListener('click', () => {
+  const content = document.getElementById('instructions-container').innerHTML;
+  const win = window.open('', '', 'height=800,width=1000');
+  win.document.write('<html><head><title>LEGO Instructions</title>');
+  win.document.write('<style>body{font-family:sans-serif;} .instruction-slide{page-break-after:always; margin-bottom:50px;} canvas{width:100%; border:1px solid #ccc} .instruction-header{font-size:24px; font-weight:bold; margin-bottom:10px}</style>');
+  win.document.write('</head><body>');
+  win.document.write('<h1>Build Instructions</h1>');
+  win.document.write(content);
+  win.document.write('</body></html>');
+  win.document.close();
+  setTimeout(()=>win.print(), 500);
+});
+
+function renderBOM(bricks) {
+  const counts = {};
+  bricks.forEach(b => {
+    const k = `${b.name}|${b.height}`; 
+    if(!counts[k]) counts[k] = {name:b.name, h:b.height, hex:b.color, count:0};
+    counts[k].count++;
+  });
+  const rows = Object.values(counts).sort((a,b) => b.h - a.h || a.name.localeCompare(b.name));
+  const tbody = el('bom-table').querySelector('tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><span class="color-dot" style="background:${r.hex}"></span>${r.name}</td><td>${r.h}</td><td>${r.count}</td>`;
+    tbody.appendChild(tr);
+  });
+  el('bom-card').style.display = 'block';
+}
+
+el('downloadCSV').addEventListener('click', () => {
+  if(!lastResult) return;
+  let csv = "x,y,height_plates,color_name,color_hex\n";
+  lastResult.bricks.forEach(b => {
+    csv += `${b.x},${b.y},${b.height},"${b.name}",${b.color}\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url; link.download = 'lego-3d-mosaic.csv';
+  link.click();
+});
+
+el('generate').addEventListener('click', generate);
+</script>
+</body>
+</html>

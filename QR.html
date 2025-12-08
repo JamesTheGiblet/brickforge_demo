@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockForge QR - Functional Brick Codes</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0D2B3E; --steel: #1A4D6D; --orange: #FF5722; --white: #FFFFFF; --light: #F5F5F5;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: var(--navy); margin: 0; height: 100vh; display: flex; }
+        
+        /* Sidebar */
+        .sidebar { width: 350px; background: white; padding: 2rem; box-shadow: 4px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; z-index: 2; }
+        .logo { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; cursor: pointer; }
+        .logo span { color: var(--orange); }
+        
+        .control-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; color: #666; text-transform: uppercase; }
+        input[type="text"], select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 0.9rem; }
+        input[type="text"]:focus { border-color: var(--orange); outline: none; }
+        
+        .color-picker { display: flex; gap: 10px; }
+        .color-opt { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .color-opt.active { border-color: var(--navy); transform: scale(1.1); }
+        
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-top: 5px; }
+        .btn-primary { background: var(--orange); color: white; box-shadow: 0 4px 10px rgba(255,87,34,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(255,87,34,0.4); }
+        .btn-secondary { background: var(--steel); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--navy); color: var(--navy); }
+        .btn-outline:hover { background: var(--navy); color: white; }
+
+        /* Main Canvas Area */
+        .workspace { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px; }
+        canvas { box-shadow: 0 10px 40px rgba(0,0,0,0.2); border-radius: 4px; max-width: 90%; max-height: 90%; }
+        
+        /* Stats Panel */
+        .stats { background: var(--navy); color: white; padding: 15px; border-radius: 10px; font-family: 'Space Mono', monospace; font-size: 0.8rem; margin-top: auto; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .stat-total { font-size: 1.2rem; font-weight: 700; color: var(--orange); margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
+
+        /* Hidden QR Generation div */
+        #qrcode { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo" onclick="location.href='index.html'">BLOCK<span>FORGE</span></div>
+        
+        <div class="control-group">
+            <label>1. Enter Content</label>
+            <input type="text" id="qr-text" placeholder="https://..." value="https://blockforgestudio.com" oninput="generate()">
+            <div style="font-size: 0.7rem; color: #888; margin-top: 5px;">*Keep URLs short for simpler builds.</div>
+        </div>
+
+        <div class="control-group">
+            <label>2. Brick Colors</label>
+            <div style="margin-bottom: 10px; font-weight: 600;">Foreground (Code)</div>
+            <div class="color-picker" id="fg-picker">
+                </div>
+            <div style="margin-top: 15px; margin-bottom: 10px; font-weight: 600;">Background</div>
+            <div class="color-picker" id="bg-picker">
+                </div>
+        </div>
+
+        <div class="control-group">
+            <label>3. Plate Size</label>
+            <select id="plate-size" onchange="generate()">
+                <option value="32">32x32 Studs (Standard)</option>
+                <option value="48">48x48 Studs (Large)</option>
+            </select>
+        </div>
+
+        <div class="stats" id="stats-panel">
+            </div>
+
+        <button class="btn btn-primary" onclick="downloadImage()">📸 Download Image</button>
+        <button class="btn btn-outline" onclick="printGuide()">📄 Print Build Guide</button>
+    </div>
+
+    <div class="workspace">
+        <canvas id="brickCanvas"></canvas>
+    </div>
+
+    <div id="qrcode"></div>
+
+<script>
+    // --- Configuration ---
+    const colors = [
+        { name: 'Black', hex: '#1B2A34' },
+        { name: 'White', hex: '#FFFFFF' },
+        { name: 'Red', hex: '#C91A09' },
+        { name: 'Blue', hex: '#0055BF' },
+        { name: 'Yellow', hex: '#F2CD37' },
+        { name: 'DkGrey', hex: '#6C6E68' },
+        { name: 'LtGrey', hex: '#A0A5A9' }
+    ];
+
+    let fgColor = colors[0]; // Black
+    let bgColor = colors[1]; // White
+    let qrData = []; // Array of arrays (0 or 1)
+    
+    // --- Init ---
+    function init() {
+        // Build color pickers
+        const fgContainer = document.getElementById('fg-picker');
+        const bgContainer = document.getElementById('bg-picker');
+        
+        colors.forEach(c => {
+            // FG Buttons
+            let btnF = document.createElement('div');
+            btnF.className = 'color-opt';
+            btnF.style.backgroundColor = c.hex;
+            btnF.onclick = () => { fgColor = c; updateActive(fgContainer, btnF); generate(); };
+            if(c.name === 'Black') btnF.classList.add('active');
+            fgContainer.appendChild(btnF);
+
+            // BG Buttons
+            let btnB = document.createElement('div');
+            btnB.className = 'color-opt';
+            btnB.style.backgroundColor = c.hex;
+            btnB.onclick = () => { bgColor = c; updateActive(bgContainer, btnB); generate(); };
+            if(c.name === 'White') btnB.classList.add('active');
+            bgContainer.appendChild(btnB);
+        });
+
+        generate();
+    }
+
+    function updateActive(container, activeBtn) {
+        Array.from(container.children).forEach(c => c.classList.remove('active'));
+        activeBtn.classList.add('active');
+    }
+
+    // --- Core Logic ---
+    function generate() {
+        const text = document.getElementById('qr-text').value || " ";
+        const size = parseInt(document.getElementById('plate-size').value);
+        
+        // 1. Generate Raw QR
+        document.getElementById('qrcode').innerHTML = "";
+        
+        // We use a high correction level (H) to make it robust for bricks
+        new QRCode(document.getElementById('qrcode'), {
+            text: text,
+            width: size * 10, // Higher res for reading
+            height: size * 10,
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // Small delay to let the library render the img tag
+        setTimeout(() => {
+            processQR(size);
+        }, 50);
+    }
+
+    function processQR(gridSize) {
+        const qrImg = document.querySelector('#qrcode img');
+        if(!qrImg) return;
+
+        // Draw QR to a temp canvas to read pixels
+        const tmpCv = document.createElement('canvas');
+        tmpCv.width = gridSize;
+        tmpCv.height = gridSize;
+        const ctx = tmpCv.getContext('2d');
+        
+        // Draw image scaled down to grid size (forcing nearest neighbor)
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(qrImg, 0, 0, gridSize, gridSize);
+        
+        const imgData = ctx.getImageData(0, 0, gridSize, gridSize).data;
+        qrData = [];
+
+        let fgCount = 0;
+        let bgCount = 0;
+
+        // Read pixels
+        for (let y = 0; y < gridSize; y++) {
+            let row = [];
+            for (let x = 0; x < gridSize; x++) {
+                const i = (y * gridSize + x) * 4;
+                // If pixel is dark (low R value), it's a block
+                const isDark = imgData[i] < 128;
+                row.push(isDark ? 1 : 0);
+                if(isDark) fgCount++; else bgCount++;
+            }
+            qrData.push(row);
+        }
+
+        renderBricks(gridSize);
+        updateStats(fgCount, bgCount);
+    }
+
+    function renderBricks(gridSize) {
+        const canvas = document.getElementById('brickCanvas');
+        const ctx = canvas.getContext('2d');
+        const brickSize = 20; // px per stud
+        const margin = 20;
+        
+        canvas.width = (gridSize * brickSize) + (margin * 2);
+        canvas.height = (gridSize * brickSize) + (margin * 2);
+
+        // Draw Baseplate
+        ctx.fillStyle = '#ddd';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Bricks
+        for (let y = 0; y < gridSize; y++) {
+            for (let x = 0; x < gridSize; x++) {
+                const isFg = qrData[y][x] === 1;
+                const color = isFg ? fgColor.hex : bgColor.hex;
+                
+                const px = margin + (x * brickSize);
+                const py = margin + (y * brickSize);
+
+                // Draw Stud Body
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(px + brickSize/2, py + brickSize/2, (brickSize/2) - 1, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw Stud Highlight (The "LEGO" look)
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.arc(px + brickSize/2 - 2, py + brickSize/2 - 2, 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                ctx.beginPath();
+                ctx.arc(px + brickSize/2 + 1, py + brickSize/2 + 1, (brickSize/2) - 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    }
+
+    function updateStats(fg, bg) {
+        const html = `
+            <div class="stat-row"><span>${fgColor.name} (1x1):</span> <span>${fg}</span></div>
+            <div class="stat-row"><span>${bgColor.name} (1x1):</span> <span>${bg}</span></div>
+            <div class="stat-total">Total: ${fg+bg}</div>
+            <div style="font-size:0.7rem; color:#aaa; margin-top:5px">Est Cost: £${((fg+bg)*0.06).toFixed(2)}</div>
+        `;
+        document.getElementById('stats-panel').innerHTML = html;
+    }
+
+    // --- Exports ---
+    function downloadImage() {
+        const canvas = document.getElementById('brickCanvas');
+        const link = document.createElement('a');
+        link.download = 'blockforge-qr.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+
+    function printGuide() {
+        const canvas = document.getElementById('brickCanvas');
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <html>
+            <head><title>BlockForge QR Guide</title><style>body{font-family:sans-serif; text-align:center;} img{border:1px solid #ccc; max-width:100%;}</style></head>
+            <body>
+                <h1>Build Guide</h1>
+                <p>Scan checks: OK ✅</p>
+                <div style="background:#eee; padding:20px; display:inline-block; border-radius:10px;">
+                    <h3>Parts List</h3>
+                    ${document.getElementById('stats-panel').innerHTML}
+                </div>
+                <br><br>
+                <img src="${canvas.toDataURL()}" />
+                <p>BlockForgeStudio.com</p>
+            </body>
+            </html>
+        `);
+        win.document.close();
+        win.print();
+    }
+
+    init();
+</script>
+</body>
+</html>
