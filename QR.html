@@ -3,162 +3,1046 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockForge QR - Functional Brick Codes</title>
+    <title>QR Studio - BlockForge | Functional Brick Codes</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --navy: #0D2B3E; --steel: #1A4D6D; --orange: #FF5722; --white: #FFFFFF; --light: #F5F5F5;
+            /* Light Theme (Default) */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-muted: #6c757d;
+            --text-inverted: #ffffff;
+            --accent-primary: #FF5722;
+            --accent-secondary: #1A4D6D;
+            --border-primary: #dee2e6;
+            --shadow-primary: rgba(0, 0, 0, 0.1);
+            --shadow-secondary: rgba(0, 0, 0, 0.15);
+            --qr-valid: #28a745;
+            --qr-warning: #ffc107;
         }
-        * { box-sizing: border-box; }
-        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: var(--navy); margin: 0; height: 100vh; display: flex; flex-direction: column; }
-        
-        /* Sidebar */
-        .sidebar { width: 350px; background: white; padding: 2rem; box-shadow: 4px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; z-index: 2; height: 100%; }
-        .logo { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; cursor: pointer; } /* This is now handled by partials */
-        .logo span { color: var(--orange); }
-        
-        .control-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; color: #666; text-transform: uppercase; }
-        input[type="text"], select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 0.9rem; }
-        input[type="text"]:focus { border-color: var(--orange); outline: none; }
-        
-        .color-picker { display: flex; gap: 10px; }
-        .color-opt { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .color-opt.active { border-color: var(--navy); transform: scale(1.1); }
 
-        /* Main Canvas Area */
-        .workspace { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px; height: 100%; }
-        canvas { box-shadow: 0 10px 40px rgba(0,0,0,0.2); border-radius: 4px; max-width: 90%; max-height: 90%; }
+        .dark-mode {
+            /* Dark Theme */
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #999999;
+            --text-inverted: #121212;
+            --accent-primary: #FF7043;
+            --accent-secondary: #4FC3F7;
+            --border-primary: #444444;
+            --shadow-primary: rgba(0, 0, 0, 0.3);
+            --shadow-secondary: rgba(0, 0, 0, 0.5);
+            --qr-valid: #20c997;
+            --qr-warning: #ffd166;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
+        body { 
+            font-family: 'Work Sans', sans-serif; 
+            background: var(--bg-primary); 
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .nav-hub {
+            background: var(--bg-secondary);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px var(--shadow-primary);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+
+        .nav-hub-title {
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            -webkit-user-select: none;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .nav-hub-title span {
+            color: var(--accent-primary);
+        }
+
+        .theme-toggle-btn {
+            background: transparent;
+            border: 2px solid var(--accent-primary);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--accent-primary);
+            transform: scale(1.1);
+        }
+
+        .nav-hub-btn {
+            background: transparent;
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+            padding: 8px 20px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+            min-height: 44px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-hub-btn:hover {
+            background: var(--accent-primary);
+            color: var(--text-inverted);
+            transform: translateY(-2px);
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #FF7043 100%);
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .page-header h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .page-header .tagline {
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .page-header .subtitle {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.6;
+            opacity: 0.85;
+        }
+
+        /* QR Type Selector */
+        .qr-type-selector {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .qr-type-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .qr-type-btn.active, .qr-type-btn:hover {
+            background: white;
+            color: var(--accent-primary);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--shadow-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        /* QR Configuration */
+        .qr-config-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .config-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .config-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .config-group input, .config-group select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-primary);
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .config-group input:focus, .config-group select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+        }
+
+        .config-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .help-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            line-height: 1.4;
+        }
+
+        .url-validation {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+        }
+
+        .url-validation.valid {
+            color: var(--qr-valid);
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .url-validation.warning {
+            color: var(--qr-warning);
+            background: rgba(255, 193, 7, 0.1);
+        }
+
+        /* Color Picker */
+        .color-picker-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .color-picker-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+
+        .color-option {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+        }
+
+        .color-option:hover {
+            transform: scale(1.05);
+        }
+
+        .color-option.active {
+            border-color: var(--accent-primary);
+            transform: scale(1.05);
+        }
+
+        .color-option.active::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-option[data-name="White"].active::after {
+            color: var(--text-primary);
+        }
+
+        .color-name {
+            font-size: 0.75rem;
+            text-align: center;
+            margin-top: 0.25rem;
+            color: var(--text-muted);
+        }
+
+        /* QR Preview Area */
+        .preview-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border: 2px solid var(--border-primary);
+        }
+
+        #brickCanvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px var(--shadow-primary);
+            background: white;
+        }
+
+        .scan-hint {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-primary);
+        }
+
+        .scan-hint span {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
         /* Stats Panel */
-        .stats { background: var(--navy); color: white; padding: 15px; border-radius: 10px; font-family: 'Space Mono', monospace; font-size: 0.8rem; margin-top: auto; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .stat-total { font-size: 1.2rem; font-weight: 700; color: var(--orange); margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
+        .stats-panel {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #FF7043 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
 
-        /* Hidden QR Generation div */
-        #qrcode { display: none; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Space Mono', monospace;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cost-estimate {
+            text-align: center;
+            font-size: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Work Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #FF7043 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(255, 87, 34, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 87, 34, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        /* Use Cases */
+        .use-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .use-case-card {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-primary);
+            transition: all 0.3s;
+        }
+
+        .use-case-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 6px 20px var(--shadow-primary);
+        }
+
+        .use-case-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .use-case-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* QR Guide */
+        .qr-guide {
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 3rem;
+            border: 2px solid var(--accent-primary);
+        }
+
+        .qr-guide h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .qr-guide h3::before {
+            content: '💡';
+        }
+
+        .qr-guide ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .qr-guide li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .qr-guide strong {
+            color: var(--accent-primary);
+        }
+
+        /* Hidden QR Generation */
+        #qrcode {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 3rem 1rem 2rem;
+            }
+            
+            .main-container {
+                padding: 0 1rem;
+            }
+            
+            .panel {
+                padding: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .use-cases {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <div data-partial="nav" data-tool-title="QR Tool"></div>
-    <div style="display: flex; flex: 1; height: calc(100vh - 50px);">
-        <div class="sidebar">
-            <div class="logo" onclick="location.href='index.html'">BLOCK<span>FORGE</span></div>
+    <!-- Navigation -->
+    <div class="nav-hub">
+        <button id="theme-toggle" class="theme-toggle-btn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+        <div class="nav-hub-title" onclick="location.href='index.html'">BLOCK<span>FORGE</span></div>
+        <a href="index.html" class="nav-hub-btn">← Home</a>
+    </div>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="page-header-content">
+            <h1>QR Studio</h1>
+            <p class="tagline">Build Functional Brick QR Codes</p>
+            <p class="subtitle">Create scannable QR codes from LEGO bricks for cafes, hotels, event spaces, and business promotions.</p>
             
-            <div class="control-group">
-                <label>1. Enter Content</label>
-                <input type="text" id="qr-text" placeholder="https://..." value="https://blockforgestudio.com" oninput="generate()">
-                <div style="font-size: 0.7rem; color: #888; margin-top: 5px;">*Keep URLs short for simpler builds.</div>
+            <div class="qr-type-selector">
+                <button class="qr-type-btn active" data-type="url" onclick="switchQRType('url')">
+                    🔗 Website URL
+                </button>
+                <button class="qr-type-btn" data-type="wifi" onclick="switchQRType('wifi')">
+                    📶 WiFi Network
+                </button>
+                <button class="qr-type-btn" data-type="contact" onclick="switchQRType('contact')">
+                    👤 Contact Card
+                </button>
+                <button class="qr-type-btn" data-type="phone" onclick="switchQRType('phone')">
+                    📱 Phone Number
+                </button>
             </div>
-    
-            <div class="control-group">
-                <label>2. Brick Colors</label>
-                <div style="margin-bottom: 10px; font-weight: 600;">Foreground (Code)</div>
-                <div class="color-picker" id="fg-picker">
-                    </div>
-                <div style="margin-top: 15px; margin-bottom: 10px; font-weight: 600;">Background</div>
-                <div class="color-picker" id="bg-picker">
-                    </div>
-            </div>
-    
-            <div class="control-group">
-                <label for="plate-size">3. Plate Size</label>
-                <select id="plate-size" onchange="generate()" aria-label="Plate Size">
-                    <option value="32">32x32 Studs (Standard)</option>
-                    <option value="48">48x48 Studs (Large)</option>
-                </select>
-            </div>
-    
-            <div class="stats" id="stats-panel">
-                </div>
-    
-            <button class="btn btn-primary" onclick="downloadImage()">📸 Download Image</button>
-            <button class="btn btn-outline" onclick="printGuide()">📄 Print Build Guide</button>
         </div>
-    
+    </section>
+
+    <!-- Main Container -->
+    <div class="main-container">
         <div class="workspace">
-            <canvas id="brickCanvas"></canvas>
+            <!-- Configuration Panel -->
+            <div class="panel">
+                <h2>QR Configuration</h2>
+                
+                <div class="qr-config-section">
+                    <!-- URL Configuration (Default) -->
+                    <div class="config-group" id="url-config">
+                        <label>Website URL</label>
+                        <input type="text" id="qr-text" placeholder="https://yourbusiness.com" value="https://blockforgestudio.com" oninput="generate()">
+                        <div class="help-text">Keep URLs short for simpler builds and better scanning reliability.</div>
+                        <div class="url-validation valid" id="url-validation">
+                            ✅ URL is valid and scannable
+                        </div>
+                    </div>
+
+                    <!-- WiFi Configuration (Hidden by default) -->
+                    <div class="config-group" id="wifi-config" style="display: none;">
+                        <label>WiFi Network Name (SSID)</label>
+                        <input type="text" id="wifi-ssid" placeholder="Your WiFi Name" oninput="updateWiFiQR()">
+                        
+                        <label>WiFi Password</label>
+                        <input type="text" id="wifi-password" placeholder="Password" oninput="updateWiFiQR()">
+                        
+                        <label>Security Type</label>
+                        <select id="wifi-security" onchange="updateWiFiQR()">
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">No Password</option>
+                        </select>
+                    </div>
+
+                    <!-- Contact Configuration (Hidden by default) -->
+                    <div class="config-group" id="contact-config" style="display: none;">
+                        <label>Contact Name</label>
+                        <input type="text" id="contact-name" placeholder="John Smith" oninput="updateContactQR()">
+                        
+                        <label>Phone Number</label>
+                        <input type="tel" id="contact-phone" placeholder="+1 (555) 123-4567" oninput="updateContactQR()">
+                        
+                        <label>Email Address</label>
+                        <input type="email" id="contact-email" placeholder="john@example.com" oninput="updateContactQR()">
+                    </div>
+
+                    <!-- Phone Configuration (Hidden by default) -->
+                    <div class="config-group" id="phone-config" style="display: none;">
+                        <label>Phone Number</label>
+                        <input type="tel" id="phone-number" placeholder="+1 (555) 123-4567" oninput="updatePhoneQR()">
+                        
+                        <label>Call Purpose (Optional)</label>
+                        <input type="text" id="phone-purpose" placeholder="e.g., Reservations, Support" oninput="updatePhoneQR()">
+                    </div>
+                </div>
+
+                <div class="color-picker-section">
+                    <div>
+                        <div class="color-picker-label">Foreground (Code)</div>
+                        <div class="color-options" id="fg-picker"></div>
+                    </div>
+                    
+                    <div>
+                        <div class="color-picker-label">Background</div>
+                        <div class="color-options" id="bg-picker"></div>
+                    </div>
+                </div>
+
+                <div class="config-group">
+                    <label>Baseplate Size</label>
+                    <select id="plate-size" onchange="generate()" aria-label="Plate Size">
+                        <option value="32">32×32 Studs (Standard)</option>
+                        <option value="48">48×48 Studs (Large)</option>
+                        <option value="64">64×64 Studs (Premium)</option>
+                    </select>
+                    <div class="help-text">Larger sizes = better scan reliability but more bricks required</div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="generate()">
+                        🔨 Generate QR Code
+                    </button>
+                </div>
+
+                <div class="stats-panel" id="stats-panel" style="display: none;">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="fg-count">0</div>
+                            <div class="stat-label" id="fg-label">Dark Bricks</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="bg-count">0</div>
+                            <div class="stat-label" id="bg-label">Light Bricks</div>
+                        </div>
+                    </div>
+                    <div class="cost-estimate" id="cost-estimate">
+                        Est. Cost: $0.00
+                    </div>
+                </div>
+
+                <div class="controls" style="margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="downloadImage()">
+                        📸 Download Image
+                    </button>
+                    <button class="btn btn-secondary" onclick="downloadCSV()">
+                        📄 Parts List (CSV)
+                    </button>
+                    <button class="btn btn-secondary" onclick="printGuide()">
+                        📖 Print Guide
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview Area -->
+            <div class="panel">
+                <h2>Preview & Test</h2>
+                <div class="preview-area">
+                    <canvas id="brickCanvas"></canvas>
+                    <div class="scan-hint">
+                        <span>📱 Test with your phone:</span> Scan this QR code to verify it works before building
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Use Cases -->
+        <div class="use-cases">
+            <div class="use-case-card">
+                <h3>🏪 Retail & Cafes</h3>
+                <p>Create scannable menus, loyalty programs, and WiFi access codes for your customers.</p>
+            </div>
+            <div class="use-case-card">
+                <h3>🏨 Hotels & Events</h3>
+                <p>Build custom QR codes for room information, event schedules, and venue maps.</p>
+            </div>
+            <div class="use-case-card">
+                <h3>🏢 Office & Business</h3>
+                <p>Generate contact cards, meeting room bookings, and company directory links.</p>
+            </div>
+            <div class="use-case-card">
+                <h3>🎨 Art & Decoration</h3>
+                <p>Combine functionality with aesthetics - create QR art pieces that scan to special content.</p>
+            </div>
+        </div>
+
+        <!-- QR Guide -->
+        <div class="qr-guide">
+            <h3>QR Code Building Tips</h3>
+            <ul>
+                <li><strong>Keep it simple:</strong> Shorter URLs and text create simpler, more reliable QR codes</li>
+                <li><strong>High contrast:</strong> Use dark bricks on light background for best scan results</li>
+                <li><strong>Test before building:</strong> Always scan your digital preview with multiple phones</li>
+                <li><strong>Size matters:</strong> Larger baseplates are easier to scan from a distance</li>
+                <li><strong>Indoor use:</strong> For outdoor displays, consider sealed displays or protective coatings</li>
+            </ul>
         </div>
     </div>
 
+    <!-- Hidden QR Generation -->
     <div id="qrcode"></div>
 
 <script>
-    // --- Configuration ---
+    /* ---------- Theme Switching ---------- */
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-toggle').innerHTML = '☀️';
+            document.getElementById('theme-toggle').setAttribute('aria-label', 'Switch to light theme');
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.getElementById('theme-toggle').innerHTML = '🌙';
+            document.getElementById('theme-toggle').setAttribute('aria-label', 'Switch to dark theme');
+        }
+    };
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    });
+
+    /* ---------- Configuration ---------- */
     const colors = [
-        // Using more vibrant, LEGO-like hex codes
+        // Using LEGO-like colors with better contrast
         { name: 'Black', hex: '#1B2A34' },
         { name: 'White', hex: '#FFFFFF' },
         { name: 'Red', hex: '#C91A09' },
         { name: 'Blue', hex: '#0055BF' },
         { name: 'Yellow', hex: '#F2CD37' },
-        { name: 'DkGrey', hex: '#6C6E68' },
-        { name: 'LtGrey', hex: '#A0A5A9' }
+        { name: 'Green', hex: '#237841' },
+        { name: 'Orange', hex: '#FE8A18' },
+        { name: 'Dark Gray', hex: '#6C6E68' },
+        { name: 'Light Gray', hex: '#A0A5A9' }
     ];
 
     let fgColor = colors[0]; // Black
     let bgColor = colors[1]; // White
-    let qr = null; // To hold the QRCode.js instance
+    let qr = null;
     let lastText = "";
-    let qrData = []; // Array of arrays (0 or 1)
-    
-    // --- Init ---
+    let qrData = [];
+    let currentQRType = 'url'; // 'url', 'wifi', 'contact', 'phone'
+
+    /* ---------- Initialize ---------- */
     function init() {
         // Build color pickers
-        const fgContainer = document.getElementById('fg-picker');
-        const bgContainer = document.getElementById('bg-picker');
+        buildColorPicker('fg-picker', colors, 0, true);
+        buildColorPicker('bg-picker', colors, 1, false);
         
-        colors.forEach(c => {
-            // FG Buttons
-            let btnF = document.createElement('div');
-            btnF.className = 'color-opt';
-            btnF.style.backgroundColor = c.hex;
-            btnF.onclick = () => { fgColor = c; updateActive(fgContainer, btnF); generate(); };
-            if(c.name === 'Black') btnF.classList.add('active');
-            fgContainer.appendChild(btnF);
-
-            // BG Buttons
-            let btnB = document.createElement('div');
-            btnB.className = 'color-opt';
-            btnB.style.backgroundColor = c.hex;
-            btnB.onclick = () => { bgColor = c; updateActive(bgContainer, btnB); generate(); };
-            if(c.name === 'White') btnB.classList.add('active');
-            bgContainer.appendChild(btnB);
-        });
-
+        // Set up event listeners
+        setupEventListeners();
+        
+        // Generate initial QR
         generate();
     }
 
-    function updateActive(container, activeBtn) {
-        Array.from(container.children).forEach(c => c.classList.remove('active'));
-        activeBtn.classList.add('active');
+    function buildColorPicker(containerId, colors, defaultIndex, isForeground) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        
+        colors.forEach((color, index) => {
+            const colorOption = document.createElement('div');
+            colorOption.className = 'color-option' + (index === defaultIndex ? ' active' : '');
+            colorOption.style.backgroundColor = color.hex;
+            colorOption.dataset.name = color.name;
+            colorOption.dataset.hex = color.hex;
+            
+            const nameSpan = document.createElement('div');
+            nameSpan.className = 'color-name';
+            nameSpan.textContent = color.name;
+            
+            const wrapper = document.createElement('div');
+            wrapper.appendChild(colorOption);
+            wrapper.appendChild(nameSpan);
+            
+            wrapper.onclick = () => {
+                if (isForeground) {
+                    fgColor = color;
+                } else {
+                    bgColor = color;
+                }
+                
+                // Update active state
+                document.querySelectorAll(`#${containerId} .color-option`).forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                colorOption.classList.add('active');
+                
+                generate();
+            };
+            
+            container.appendChild(wrapper);
+        });
     }
 
-    // --- Core Logic ---
-    function generate() {
-        const text = document.getElementById('qr-text').value || " ";
-        const size = parseInt(document.getElementById('plate-size').value);
+    function setupEventListeners() {
+        // URL validation
+        const urlInput = document.getElementById('qr-text');
+        urlInput.addEventListener('input', validateURL);
+        
+        // Initial validation
+        validateURL();
+    }
 
-        // Avoid re-generating the core QR data if only colors change
-        if (text === lastText && qr) {
-            processQR(size); // Just re-render with new colors
+    function validateURL() {
+        const url = document.getElementById('qr-text').value;
+        const validationElement = document.getElementById('url-validation');
+        
+        if (!url) {
+            validationElement.textContent = '⚠️ Enter a URL to generate QR code';
+            validationElement.className = 'url-validation warning';
+            return false;
+        }
+        
+        // Basic URL validation
+        const urlPattern = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]{2,}(\/.*)?$/i;
+        const isValid = urlPattern.test(url);
+        
+        if (isValid) {
+            validationElement.textContent = '✅ URL is valid and scannable';
+            validationElement.className = 'url-validation valid';
+            return true;
+        } else {
+            validationElement.textContent = '⚠️ Check URL format (should start with http:// or https://)';
+            validationElement.className = 'url-validation warning';
+            return false;
+        }
+    }
+
+    /* ---------- QR Type Switching ---------- */
+    function switchQRType(type) {
+        currentQRType = type;
+        
+        // Update active button
+        document.querySelectorAll('.qr-type-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`.qr-type-btn[data-type="${type}"]`).classList.add('active');
+        
+        // Show/hide configuration sections
+        ['url', 'wifi', 'contact', 'phone'].forEach(t => {
+            const element = document.getElementById(`${t}-config`);
+            if (element) {
+                element.style.display = t === type ? 'block' : 'none';
+            }
+        });
+        
+        // Generate QR for the selected type
+        generate();
+    }
+
+    function getQRContent() {
+        switch (currentQRType) {
+            case 'wifi':
+                const ssid = document.getElementById('wifi-ssid').value || 'YourWiFi';
+                const password = document.getElementById('wifi-password').value || '';
+                const security = document.getElementById('wifi-security').value;
+                
+                if (security === 'nopass') {
+                    return `WIFI:S:${ssid};T:nopass;;`;
+                } else {
+                    return `WIFI:S:${ssid};T:${security};P:${password};;`;
+                }
+                
+            case 'contact':
+                const name = document.getElementById('contact-name').value || 'John Smith';
+                const phone = document.getElementById('contact-phone').value || '';
+                const email = document.getElementById('contact-email').value || '';
+                
+                let vcard = 'BEGIN:VCARD\nVERSION:3.0\n';
+                vcard += `FN:${name}\n`;
+                if (phone) vcard += `TEL:${phone}\n`;
+                if (email) vcard += `EMAIL:${email}\n`;
+                vcard += 'END:VCARD';
+                
+                return vcard;
+                
+            case 'phone':
+                const phoneNumber = document.getElementById('phone-number').value || '';
+                const purpose = document.getElementById('phone-purpose').value || '';
+                
+                let phoneQR = `tel:${phoneNumber}`;
+                if (purpose) {
+                    phoneQR += `?subject=${encodeURIComponent(purpose)}`;
+                }
+                
+                return phoneQR;
+                
+            case 'url':
+            default:
+                return document.getElementById('qr-text').value || 'https://blockforgestudio.com';
+        }
+    }
+
+    function updateWiFiQR() {
+        generate();
+    }
+
+    function updateContactQR() {
+        generate();
+    }
+
+    function updatePhoneQR() {
+        generate();
+    }
+
+    /* ---------- Core QR Generation ---------- */
+    function generate() {
+        const text = getQRContent();
+        const size = parseInt(document.getElementById('plate-size').value);
+        
+        // For WiFi, contact, and phone, always regenerate
+        if (currentQRType === 'url' && text === lastText && qr) {
+            processQR(size);
             return;
         }
+        
         lastText = text;
 
-        // 1. Generate Raw QR
+        // Clear existing QR
         document.getElementById('qrcode').innerHTML = "";
         
-        // We use a high correction level (H) to make it robust for bricks
+        // Generate new QR with high error correction
         qr = new QRCode(document.getElementById('qrcode'), {
             text: text,
-            width: size * 10, // Higher res for reading
+            width: size * 10, // Higher resolution for better processing
             height: size * 10,
-            correctLevel : QRCode.CorrectLevel.H
+            correctLevel: QRCode.CorrectLevel.H // Highest error correction
         });
 
-        // Small delay to let the library render the img tag
+        // Wait for QR to render
         setTimeout(() => {
             processQR(size);
         }, 50);
@@ -166,15 +1050,15 @@
 
     function processQR(gridSize) {
         const qrImg = document.querySelector('#qrcode img');
-        if(!qrImg) return;
+        if (!qrImg) return;
 
-        // Draw QR to a temp canvas to read pixels
-        const tmpCv = document.createElement('canvas');
-        tmpCv.width = gridSize;
-        tmpCv.height = gridSize;
-        const ctx = tmpCv.getContext('2d');
+        // Create temporary canvas for pixel processing
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = gridSize;
+        tempCanvas.height = gridSize;
+        const ctx = tempCanvas.getContext('2d');
         
-        // Draw image scaled down to grid size (forcing nearest neighbor)
+        // Disable smoothing for crisp edges
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(qrImg, 0, 0, gridSize, gridSize);
         
@@ -184,37 +1068,36 @@
         let fgCount = 0;
         let bgCount = 0;
 
-        // Read pixels
+        // Process pixels into QR data
         for (let y = 0; y < gridSize; y++) {
             let row = [];
             for (let x = 0; x < gridSize; x++) {
                 const i = (y * gridSize + x) * 4;
-                // If pixel is dark (low R value), it's a block
-                const isDark = imgData[i] < 128;
+                const isDark = imgData[i] < 128; // Dark pixel = brick
                 row.push(isDark ? 1 : 0);
-                if(isDark) fgCount++; else bgCount++;
+                if (isDark) fgCount++; else bgCount++;
             }
             qrData.push(row);
         }
 
         renderBricks(gridSize);
-        updateStats(fgCount, bgCount);
+        updateStats(fgCount, bgCount, gridSize);
     }
 
     function renderBricks(gridSize) {
         const canvas = document.getElementById('brickCanvas');
         const ctx = canvas.getContext('2d');
-        const brickSize = 20; // px per stud
+        const brickSize = 20;
         const margin = 20;
         
         canvas.width = (gridSize * brickSize) + (margin * 2);
         canvas.height = (gridSize * brickSize) + (margin * 2);
 
-        // Draw Baseplate
-        ctx.fillStyle = '#ddd';
+        // Draw background
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-tertiary');
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw Bricks
+        // Draw brick studs
         for (let y = 0; y < gridSize; y++) {
             for (let x = 0; x < gridSize; x++) {
                 const isFg = qrData[y][x] === 1;
@@ -223,19 +1106,19 @@
                 const px = margin + (x * brickSize);
                 const py = margin + (y * brickSize);
 
-                // Draw Stud Body
+                // Brick stud body
                 ctx.fillStyle = color;
                 ctx.beginPath();
                 ctx.arc(px + brickSize/2, py + brickSize/2, (brickSize/2) - 1, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Draw Stud Highlight (The "LEGO" look)
+                // Stud highlight
                 ctx.fillStyle = 'rgba(255,255,255,0.3)';
                 ctx.beginPath();
                 ctx.arc(px + brickSize/2 - 2, py + brickSize/2 - 2, 2, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Draw Shadow
+                // Stud shadow
                 ctx.fillStyle = 'rgba(0,0,0,0.1)';
                 ctx.beginPath();
                 ctx.arc(px + brickSize/2 + 1, py + brickSize/2 + 1, (brickSize/2) - 1, 0, Math.PI * 2);
@@ -244,49 +1127,135 @@
         }
     }
 
-    function updateStats(fg, bg) {
-        const html = `
-            <div class="stat-row"><span>${fgColor.name} (1x1):</span> <span>${fg}</span></div>
-            <div class="stat-row"><span>${bgColor.name} (1x1):</span> <span>${bg}</span></div>
-            <div class="stat-total">Total: ${fg+bg}</div>
-            <div style="font-size:0.7rem; color:#aaa; margin-top:5px">Est Cost: £${((fg+bg)*0.06).toFixed(2)}</div>
+    function updateStats(fg, bg, gridSize) {
+        const statsPanel = document.getElementById('stats-panel');
+        statsPanel.style.display = 'block';
+        
+        // Update foreground stats
+        document.getElementById('fg-count').textContent = fg.toLocaleString();
+        document.getElementById('fg-label').textContent = `${fgColor.name} Bricks`;
+        
+        // Update background stats
+        document.getElementById('bg-count').textContent = bg.toLocaleString();
+        document.getElementById('bg-label').textContent = `${bgColor.name} Bricks`;
+        
+        // Calculate cost
+        const totalBricks = fg + bg;
+        const costPerBrick = 0.06;
+        const totalCost = (totalBricks * costPerBrick).toFixed(2);
+        
+        document.getElementById('cost-estimate').innerHTML = `
+            Est. Cost: <strong>$${totalCost}</strong> @ $${costPerBrick.toFixed(2)}/brick<br>
+            <small>Size: ${gridSize}×${gridSize} studs (${(gridSize * 0.8).toFixed(1)}")</small>
         `;
-        document.getElementById('stats-panel').innerHTML = html;
     }
 
-    // --- Exports ---
+    /* ---------- Export Functions ---------- */
     function downloadImage() {
+        if (!qrData.length) {
+            alert("Please generate a QR code first.");
+            return;
+        }
+        
         const canvas = document.getElementById('brickCanvas');
         const link = document.createElement('a');
-        link.download = 'blockforge-qr.png';
+        link.download = `blockforge-qr-${currentQRType}.png`;
         link.href = canvas.toDataURL();
         link.click();
     }
 
+    function downloadCSV() {
+        if (!qrData.length) {
+            alert("Please generate a QR code first.");
+            return;
+        }
+        
+        let csv = "x,y,color,brick_type\n";
+        for (let y = 0; y < qrData.length; y++) {
+            for (let x = 0; x < qrData[y].length; x++) {
+                const isFg = qrData[y][x] === 1;
+                const colorName = isFg ? fgColor.name : bgColor.name;
+                const colorHex = isFg ? fgColor.hex : bgColor.hex;
+                csv += `${x},${y},"${colorName}","${colorHex}",1x1\n`;
+            }
+        }
+        
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'blockforge-qr-parts-list.csv';
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+    }
+
     function printGuide() {
+        if (!qrData.length) {
+            alert("Please generate a QR code first.");
+            return;
+        }
+        
         const canvas = document.getElementById('brickCanvas');
         const win = window.open('', '_blank');
         win.document.write(`
             <html>
-            <head><title>BlockForge QR Guide</title><style>body{font-family:sans-serif; text-align:center;} img{border:1px solid #ccc; max-width:100%;}</style></head>
+            <head>
+                <title>BlockForge QR Build Guide</title>
+                <style>
+                    body { 
+                        font-family: 'Work Sans', sans-serif;
+                        padding: 2rem;
+                        max-width: 800px;
+                        margin: 0 auto;
+                    }
+                    h1 { color: #333; }
+                    .stats { 
+                        background: #f8f9fa;
+                        padding: 1rem;
+                        border-radius: 8px;
+                        margin: 1rem 0;
+                    }
+                    img { 
+                        max-width: 100%;
+                        height: auto;
+                        border: 1px solid #ddd;
+                        border-radius: 8px;
+                        margin: 1rem 0;
+                    }
+                    .print-only { display: block; }
+                    @media print {
+                        .print-only { display: none; }
+                        button { display: none; }
+                    }
+                </style>
+            </head>
             <body>
-                <h1>Build Guide</h1>
-                <p>Scan checks: OK ✅</p>
-                <div style="background:#eee; padding:20px; display:inline-block; border-radius:10px;">
+                <h1>BlockForge QR Build Guide</h1>
+                <div class="stats">
                     <h3>Parts List</h3>
                     ${document.getElementById('stats-panel').innerHTML}
                 </div>
-                <br><br>
+                <h3>QR Code Layout</h3>
                 <img src="${canvas.toDataURL()}" />
-                <p>BlockForgeStudio.com</p>
+                <h3>Build Instructions</h3>
+                <ol>
+                    <li>Start from bottom-left corner</li>
+                    <li>Build row by row from left to right</li>
+                    <li>Use 1x1 bricks only for best results</li>
+                    <li>Test scan after each row to verify alignment</li>
+                </ol>
+                <div class="print-only">
+                    <button onclick="window.print()">🖨️ Print Guide</button>
+                    <button onclick="window.close()">❌ Close</button>
+                </div>
             </body>
             </html>
         `);
         win.document.close();
-        win.print();
     }
 
-    init();
+    // Initialize
+    document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>

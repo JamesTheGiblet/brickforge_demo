@@ -2,92 +2,844 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="assets/blockforge.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockForge Sign Studio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;600;800&display=swap" rel="stylesheet">
+    <title>Sign Studio - BlockForge | Custom Text Signs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* Redundant #image-preview from copy-paste, can be removed */
-        #image-preview {
-            width: 100%;
-            height: 180px;
-            object-fit: contain;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: none;
-            border: 2px solid #eee;
-            background: #f8f8f8;
+        :root {
+            /* Light Theme (Default) */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-muted: #6c757d;
+            --text-inverted: #ffffff;
+            --accent-primary: #FF5722;
+            --accent-secondary: #1A4D6D;
+            --border-primary: #dee2e6;
+            --shadow-primary: rgba(0, 0, 0, 0.1);
+            --shadow-secondary: rgba(0, 0, 0, 0.15);
         }
-        :root { --navy: #0D2B3E; --steel: #1A4D6D; --orange: #FF5722; --white: #FFFFFF; }
-        * { box-sizing: border-box; }
-        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: var(--navy); margin: 0; height: 100vh; display: flex; flex-direction: column; }
-        
-        /* Sidebar */
-        .sidebar { width: 350px; background: white; padding: 2rem; box-shadow: 4px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; z-index: 2; height: 100%; }
-        .logo { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; cursor: pointer; } /* This is now handled by partials */
-        .logo span { color: var(--orange); }
-        
-        .control-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; color: #666; text-transform: uppercase; }
-        input[type="text"], select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 1.2rem; text-transform: uppercase; }
-        input[type="text"]:focus { border-color: var(--orange); outline: none; }
-        
-        .color-picker { display: flex; gap: 10px; flex-wrap: wrap;}
-        .color-opt { width: 35px; height: 35px; border-radius: 5px; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .color-opt.active { border-color: var(--navy); transform: scale(1.1); }
 
-        /* Workspace */
-        .workspace { flex: 1; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px; padding: 20px; overflow: auto; height: 100%; }
-        canvas { box-shadow: 0 10px 40px rgba(0,0,0,0.2); border-radius: 4px; max-width: 95%; }
+        .dark-mode {
+            /* Dark Theme */
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #999999;
+            --text-inverted: #121212;
+            --accent-primary: #FF7043;
+            --accent-secondary: #4FC3F7;
+            --border-primary: #444444;
+            --shadow-primary: rgba(0, 0, 0, 0.3);
+            --shadow-secondary: rgba(0, 0, 0, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Stats */
-        .stats { background: var(--navy); color: white; padding: 15px; border-radius: 10px; font-family: 'Space Mono', monospace; font-size: 0.8rem; margin-top: auto; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .stat-total { font-size: 1.2rem; font-weight: 700; color: var(--orange); margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
+        body { 
+            font-family: 'Work Sans', sans-serif; 
+            background: var(--bg-primary); 
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .nav-hub {
+            background: var(--bg-secondary);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px var(--shadow-primary);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+
+        .nav-hub-title {
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            -webkit-user-select: none;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .nav-hub-title span {
+            color: var(--accent-primary);
+        }
+
+        .theme-toggle-btn {
+            background: transparent;
+            border: 2px solid var(--accent-primary);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--accent-primary);
+            transform: scale(1.1);
+        }
+
+        .nav-hub-btn {
+            background: transparent;
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+            padding: 8px 20px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+            min-height: 44px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-hub-btn:hover {
+            background: var(--accent-primary);
+            color: var(--text-inverted);
+            transform: translateY(-2px);
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #FF7043 100%);
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .page-header h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .page-header .tagline {
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .page-header .subtitle {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.6;
+            opacity: 0.85;
+        }
+
+        /* Sign Type Selector */
+        .sign-type-selector {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .sign-type-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sign-type-btn.active, .sign-type-btn:hover {
+            background: white;
+            color: var(--accent-primary);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--shadow-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        /* Sign Configuration */
+        .sign-config-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .config-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .config-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .config-group input, .config-group select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-primary);
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .config-group input:focus, .config-group select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+        }
+
+        .config-group input::placeholder {
+            color: var(--text-muted);
+            text-transform: none;
+        }
+
+        .help-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            line-height: 1.4;
+        }
+
+        .char-counter {
+            font-size: 0.8rem;
+            text-align: right;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .char-counter.warning {
+            color: #dc3545;
+        }
+
+        /* Color Picker */
+        .color-picker-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .color-picker-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .color-picker-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            position: relative;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: var(--accent-primary);
+            transform: scale(1.05);
+        }
+
+        .color-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-option[data-name="White"].active::after {
+            color: var(--text-primary);
+        }
+
+        .color-name {
+            font-size: 0.75rem;
+            text-align: center;
+            margin-top: 0.25rem;
+            color: var(--text-muted);
+        }
+
+        /* Sign Preview Area */
+        .preview-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border: 2px solid var(--border-primary);
+            min-height: 500px;
+        }
+
+        #signCanvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px var(--shadow-primary);
+            background: white;
+        }
+
+        .preview-hint {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-primary);
+            max-width: 400px;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #FF7043 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Space Mono', monospace;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dimensions {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Work Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #FF7043 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(255, 87, 34, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 87, 34, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        /* Use Cases */
+        .use-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .use-case-card {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-primary);
+            transition: all 0.3s;
+        }
+
+        .use-case-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 6px 20px var(--shadow-primary);
+        }
+
+        .use-case-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .use-case-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Sign Guide */
+        .sign-guide {
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 3rem;
+            border: 2px solid var(--accent-primary);
+        }
+
+        .sign-guide h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sign-guide h3::before {
+            content: '💡';
+        }
+
+        .sign-guide ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .sign-guide li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .sign-guide strong {
+            color: var(--accent-primary);
+        }
+
+        /* Font Preview */
+        .font-preview {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border-primary);
+        }
+
+        .font-preview h4 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .font-sample {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--border-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 3rem 1rem 2rem;
+            }
+            
+            .main-container {
+                padding: 0 1rem;
+            }
+            
+            .panel {
+                padding: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .use-cases {
+                grid-template-columns: 1fr;
+            }
+            
+            .color-options {
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
-    <div data-partial="nav" data-tool-title="Sign Tool"></div>
-    <div style="display: flex; flex: 1; height: calc(100vh - 50px);">
-        <div class="sidebar">
-            <div class="logo" onclick="location.href='index.html'">BLOCK<span>FORGE</span></div>
+    <!-- Navigation -->
+    <div class="nav-hub">
+        <button id="theme-toggle" class="theme-toggle-btn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+        <div class="nav-hub-title" onclick="location.href='index.html'">BLOCK<span>FORGE</span></div>
+        <a href="index.html" class="nav-hub-btn">← Home</a>
+    </div>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="page-header-content">
+            <h1>Sign Studio</h1>
+            <p class="tagline">Create Custom Brick Text Signs</p>
+            <p class="subtitle">Generate personalized text signs for desks, offices, events, and gifts. Perfect for nameplates, welcome signs, and special occasions.</p>
             
-            <div class="control-group">
-                <label>1. Text (Max 12 chars)</label>
-                <input type="text" id="text-input" placeholder="JAMES" value="LEGO" maxlength="12" oninput="generate()">
+            <div class="sign-type-selector">
+                <button class="sign-type-btn active" onclick="switchSignType('desk')">
+                    🖥️ Desk Sign
+                </button>
+                <button class="sign-type-btn" onclick="switchSignType('door')">
+                    🚪 Door Sign
+                </button>
+                <button class="sign-type-btn" onclick="switchSignType('event')">
+                    🎉 Event Sign
+                </button>
+                <button class="sign-type-btn" onclick="switchSignType('gift')">
+                    🎁 Gift Sign
+                </button>
             </div>
-    
-            <div class="control-group">
-                <label>2. Colors</label>
-                <div style="margin-bottom:5px; font-size:0.8rem;">Text Color</div>
-                <div class="color-picker" id="text-color-picker"></div>
-                <div style="margin-top:10px; margin-bottom:5px; font-size:0.8rem;">Background</div>
-                <div class="color-picker" id="bg-color-picker"></div>
-                <div style="margin-top:10px; margin-bottom:5px; font-size:0.8rem;">Border</div>
-                <div class="color-picker" id="border-color-picker"></div>
-            </div>
-    
-            <div class="control-group">
-                <label for="size-select">3. Height</label>
-                <select id="size-select" onchange="generate()">
-                    <option value="compact">Compact (7 studs high)</option>
-                    <option value="bold">Bold (9 studs high)</option>
-                </select>
-            </div>
-    
-            <div class="stats" id="stats-panel"></div>
-    
-            <button class="btn btn-primary" onclick="downloadImage()">📸 Download Design</button>
-            <button class="btn btn-outline" onclick="printGuide()">📄 Print Build Guide</button>
         </div>
-    
+    </section>
+
+    <!-- Main Container -->
+    <div class="main-container">
         <div class="workspace">
-            <canvas id="signCanvas"></canvas>
+            <!-- Configuration Panel -->
+            <div class="panel">
+                <h2>Sign Configuration</h2>
+                
+                <div class="sign-config-section">
+                    <div class="config-group">
+                        <label>Text Content (Max 12 characters)</label>
+                        <input type="text" id="text-input" placeholder="Enter text here" value="LEGO" maxlength="12" oninput="updateCharCounter()">
+                        <div class="char-counter" id="char-counter">
+                            <span id="char-count">4</span>/12 characters
+                        </div>
+                        <div class="help-text">Text will be converted to uppercase for the brick font.</div>
+                    </div>
+
+                    <div class="color-picker-section">
+                        <div class="color-picker-group">
+                            <div class="color-picker-label">Text Color</div>
+                            <div class="color-options" id="text-color-picker"></div>
+                        </div>
+                        
+                        <div class="color-picker-group">
+                            <div class="color-picker-label">Background Color</div>
+                            <div class="color-options" id="bg-color-picker"></div>
+                        </div>
+                        
+                        <div class="color-picker-group">
+                            <div class="color-picker-label">Border Color</div>
+                            <div class="color-options" id="border-color-picker"></div>
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="size-select">Sign Size</label>
+                        <select id="size-select" onchange="generate()" aria-label="Sign Size">
+                            <option value="compact">Compact (7 studs high)</option>
+                            <option value="bold" selected>Bold (9 studs high)</option>
+                            <option value="large">Large (11 studs high)</option>
+                        </select>
+                        <div class="help-text">Larger sizes are more readable but require more bricks.</div>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="border-style">Border Style</label>
+                        <select id="border-style" onchange="generate()">
+                            <option value="thin">Thin (1 stud)</option>
+                            <option value="medium" selected>Medium (2 studs)</option>
+                            <option value="thick">Thick (3 studs)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="generate()">
+                        🔨 Generate Sign
+                    </button>
+                </div>
+
+                <div class="stats-panel" id="stats-panel">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="text-count">0</div>
+                            <div class="stat-label" id="text-label">Text Bricks</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="bg-count">0</div>
+                            <div class="stat-label" id="bg-label">Background</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="border-count">0</div>
+                            <div class="stat-label" id="border-label">Border</div>
+                        </div>
+                    </div>
+                    <div class="dimensions" id="dimensions">
+                        Dimensions: 0×0 studs
+                    </div>
+                </div>
+
+                <div class="controls" style="margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="downloadImage()">
+                        📸 Download Image
+                    </button>
+                    <button class="btn btn-secondary" onclick="downloadCSV()">
+                        📄 Parts List (CSV)
+                    </button>
+                    <button class="btn btn-secondary" onclick="printGuide()">
+                        📖 Print Guide
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview Area -->
+            <div class="panel">
+                <h2>Sign Preview</h2>
+                <div class="preview-area">
+                    <canvas id="signCanvas"></canvas>
+                    <div class="preview-hint">
+                        <span>🎯 Tip:</span> This brick sign is designed for easy building. Each colored square represents one 1x1 brick stud.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Font Preview -->
+        <div class="font-preview">
+            <h4>Brick Font Preview</h4>
+            <div class="font-sample" id="font-sample">
+                ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789
+            </div>
+            <div class="help-text" style="margin-top: 0.5rem;">
+                Our pixel-perfect font is optimized for brick building with clear, readable characters.
+            </div>
+        </div>
+
+        <!-- Use Cases -->
+        <div class="use-cases">
+            <div class="use-case-card">
+                <h3>🖥️ Office Desks</h3>
+                <p>Create professional nameplates for office desks, meeting rooms, and reception areas.</p>
+            </div>
+            <div class="use-case-card">
+                <h3>🏠 Home Decor</h3>
+                <p>Make welcome signs, house numbers, and personalized family name signs for your home.</p>
+            </div>
+            <div class="use-case-card">
+                <h3>🎓 Graduation & Awards</h3>
+                <p>Celebrate achievements with custom award plaques and graduation recognition signs.</p>
+            </div>
+            <div class="use-case-card">
+                <h3>💍 Weddings & Events</h3>
+                <p>Design table numbers, welcome signs, and directional signage for special events.</p>
+            </div>
+        </div>
+
+        <!-- Sign Guide -->
+        <div class="sign-guide">
+            <h3>Building Tips for Perfect Signs</h3>
+            <ul>
+                <li><strong>Start with the border:</strong> Build the outer frame first for proper alignment</li>
+                <li><strong>Work row by row:</strong> Build from bottom to top, left to right</li>
+                <li><strong>Use plates for large areas:</strong> Combine 2x2, 2x4 plates for faster background building</li>
+                <li><strong>Check spacing:</strong> Leave one stud between letters for readability</li>
+                <li><strong>Consider display:</strong> Add a baseplate or stand for vertical display options</li>
+            </ul>
         </div>
     </div>
 
 <script>
-    // --- Font Definition (5x5 Pixel Font) ---
+    /* ---------- Theme Switching ---------- */
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-toggle').innerHTML = '☀️';
+            document.getElementById('theme-toggle').setAttribute('aria-label', 'Switch to light theme');
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.getElementById('theme-toggle').innerHTML = '🌙';
+            document.getElementById('theme-toggle').setAttribute('aria-label', 'Switch to dark theme');
+        }
+    };
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    });
+
+    /* ---------- Font Definition (5x5 Pixel Font) ---------- */
     const font5x5 = {
         'A': [[0,1,1,1,0],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1]],
         'B': [[1,1,1,1,0],[1,0,0,0,1],[1,1,1,1,0],[1,0,0,0,1],[1,1,1,1,0]],
@@ -97,7 +849,7 @@
         'F': [[1,1,1,1,1],[1,0,0,0,0],[1,1,1,1,0],[1,0,0,0,0],[1,0,0,0,0]],
         'G': [[0,1,1,1,1],[1,0,0,0,0],[1,0,1,1,1],[1,0,0,0,1],[0,1,1,1,1]],
         'H': [[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1]],
-        'I': [[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]], // Narrower
+        'I': [[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]],
         'J': [[0,0,0,0,1],[0,0,0,0,1],[0,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
         'K': [[1,0,0,0,1],[1,0,0,1,0],[1,1,1,0,0],[1,0,0,1,0],[1,0,0,0,1]],
         'L': [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,1,1]],
@@ -115,191 +867,421 @@
         'X': [[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
         'Y': [[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]],
         'Z': [[1,1,1,1,1],[0,0,0,1,0],[0,0,1,0,0],[0,1,0,0,0],[1,1,1,1,1]],
-        ' ': [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]], // Space
+        ' ': [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],
         '0': [[0,1,1,1,0],[1,0,0,1,1],[1,0,1,0,1],[1,1,0,0,1],[0,1,1,1,0]],
         '1': [[0,0,1,0,0],[0,1,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,1,1,1,0]],
-        '-': [[0,0,0],[0,0,0],[1,1,1],[0,0,0],[0,0,0]]
+        '2': [[0,1,1,1,0],[1,0,0,0,1],[0,0,1,1,0],[0,1,0,0,0],[1,1,1,1,1]],
+        '3': [[1,1,1,1,0],[0,0,0,0,1],[0,1,1,1,0],[0,0,0,0,1],[1,1,1,1,0]],
+        '4': [[0,0,1,1,0],[0,1,0,1,0],[1,0,0,1,0],[1,1,1,1,1],[0,0,0,1,0]],
+        '5': [[1,1,1,1,1],[1,0,0,0,0],[1,1,1,1,0],[0,0,0,0,1],[1,1,1,1,0]],
+        '6': [[0,1,1,1,0],[1,0,0,0,0],[1,1,1,1,0],[1,0,0,0,1],[0,1,1,1,0]],
+        '7': [[1,1,1,1,1],[0,0,0,0,1],[0,0,0,1,0],[0,0,1,0,0],[0,1,0,0,0]],
+        '8': [[0,1,1,1,0],[1,0,0,0,1],[0,1,1,1,0],[1,0,0,0,1],[0,1,1,1,0]],
+        '9': [[0,1,1,1,0],[1,0,0,0,1],[0,1,1,1,1],[0,0,0,0,1],[0,1,1,1,0]],
+        '-': [[0,0,0],[0,0,0],[1,1,1],[0,0,0],[0,0,0]],
+        '!': [[1],[1],[1],[0],[1]],
+        '?': [[1,1,1,0],[0,0,0,1],[0,1,1,0],[0,0,0,0],[0,1,0,0]]
     };
 
-    // --- Colors ---
+    /* ---------- Colors ---------- */
     const colors = [
         { name: 'Black', hex: '#1B2A34' },
         { name: 'White', hex: '#FFFFFF' },
         { name: 'Red', hex: '#C91A09' },
         { name: 'Blue', hex: '#0055BF' },
         { name: 'Yellow', hex: '#F2CD37' },
-        { name: 'DkGrey', hex: '#6C6E68' },
-        { name: 'LtGrey', hex: '#A0A5A9' },
-        { name: 'Green', hex: '#237841' }
+        { name: 'Green', hex: '#237841' },
+        { name: 'Orange', hex: '#FE8A18' },
+        { name: 'Dark Gray', hex: '#6C6E68' },
+        { name: 'Light Gray', hex: '#A0A5A9' }
     ];
 
     let textColor = colors[0]; // Black
     let bgColor = colors[1];   // White
     let borderColor = colors[0]; // Black
 
+    /* ---------- Initialize ---------- */
     function init() {
-        buildColorPicker('text-color-picker', (c) => { textColor = c; generate(); }, 'Black');
-        buildColorPicker('bg-color-picker', (c) => { bgColor = c; generate(); }, 'White');
-        buildColorPicker('border-color-picker', (c) => { borderColor = c; generate(); }, 'Black');
+        buildColorPicker('text-color-picker', colors, 0, true);
+        buildColorPicker('bg-color-picker', colors, 1, false);
+        buildColorPicker('border-color-picker', colors, 0, false);
+        
+        updateCharCounter();
         generate();
     }
 
-    function buildColorPicker(id, callback, defaultName) {
-        const container = document.getElementById(id);
-        colors.forEach(c => {
-            let btn = document.createElement('div');
-            btn.className = 'color-opt';
-            btn.style.backgroundColor = c.hex;
-            btn.onclick = () => { 
-                Array.from(container.children).forEach(x => x.classList.remove('active'));
-                btn.classList.add('active');
-                callback(c); 
+    function buildColorPicker(containerId, colors, defaultIndex, isText) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        
+        colors.forEach((color, index) => {
+            const colorOption = document.createElement('div');
+            colorOption.className = 'color-option' + (index === defaultIndex ? ' active' : '');
+            colorOption.style.backgroundColor = color.hex;
+            colorOption.dataset.name = color.name;
+            colorOption.dataset.hex = color.hex;
+            
+            const nameSpan = document.createElement('div');
+            nameSpan.className = 'color-name';
+            nameSpan.textContent = color.name;
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'inline-block';
+            wrapper.style.textAlign = 'center';
+            wrapper.style.margin = '0 4px 4px 0';
+            wrapper.appendChild(colorOption);
+            wrapper.appendChild(nameSpan);
+            
+            wrapper.onclick = () => {
+                if (isText) {
+                    textColor = color;
+                } else if (containerId === 'bg-color-picker') {
+                    bgColor = color;
+                } else {
+                    borderColor = color;
+                }
+                
+                document.querySelectorAll(`#${containerId} .color-option`).forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                colorOption.classList.add('active');
+                
+                generate();
             };
-            if(c.name === defaultName) btn.classList.add('active');
-            container.appendChild(btn);
+            
+            container.appendChild(wrapper);
         });
     }
 
+    function updateCharCounter() {
+        const text = document.getElementById('text-input').value;
+        const counter = document.getElementById('char-counter');
+        const count = document.getElementById('char-count');
+        
+        count.textContent = text.length;
+        
+        if (text.length >= 10) {
+            counter.classList.add('warning');
+        } else {
+            counter.classList.remove('warning');
+        }
+    }
+
+    function switchSignType(type) {
+        // Update active button
+        document.querySelectorAll('.sign-type-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`.sign-type-btn[onclick="switchSignType('${type}')"]`).classList.add('active');
+        
+        // Set appropriate text based on type
+        const textInput = document.getElementById('text-input');
+        switch(type) {
+            case 'desk':
+                textInput.value = 'JAMES';
+                break;
+            case 'door':
+                textInput.value = 'WELCOME';
+                break;
+            case 'event':
+                textInput.value = 'PARTY';
+                break;
+            case 'gift':
+                textInput.value = 'FOR YOU';
+                break;
+        }
+        
+        updateCharCounter();
+        generate();
+    }
+
+    /* ---------- Generate Sign ---------- */
     function generate() {
         const text = document.getElementById('text-input').value.toUpperCase();
-        const mode = document.getElementById('size-select').value;
-        const padding = mode === 'compact' ? 1 : 2; // Studs padding
+        const sizeMode = document.getElementById('size-select').value;
+        const borderStyle = document.getElementById('border-style').value;
+        
+        // Calculate padding based on size mode
+        let padding;
+        switch(sizeMode) {
+            case 'compact': padding = 1; break;
+            case 'bold': padding = 2; break;
+            case 'large': padding = 3; break;
+            default: padding = 2;
+        }
+        
+        // Calculate border thickness
+        let borderThickness;
+        switch(borderStyle) {
+            case 'thin': borderThickness = 1; break;
+            case 'medium': borderThickness = 2; break;
+            case 'thick': borderThickness = 3; break;
+            default: borderThickness = 2;
+        }
+        
         const spacing = 1; // Studs between letters
+        const rows = 5; // Font height
         
+        // 1. Construct letter grid
         let grid = [];
-        let rows = 5; // Font height
+        for(let i = 0; i < rows; i++) grid[i] = [];
         
-        // 1. Construct Grid from Font
-        // Initialize empty rows
-        for(let i=0; i<rows; i++) grid[i] = [];
-
-        // Add letters
+        // Add letters with spacing
         for (let char of text) {
             let letterMap = font5x5[char] || font5x5[' '];
-            if(!letterMap) letterMap = font5x5[' ']; // fallback
-
-            for(let r=0; r<rows; r++) {
+            if (!letterMap) letterMap = font5x5[' '];
+            
+            for(let r = 0; r < rows; r++) {
                 grid[r] = grid[r].concat(letterMap[r]);
-                grid[r].push(0); // Spacing
+                grid[r].push(0); // Add spacing
             }
         }
+        
         // Remove last spacing
-        for(let r=0; r<rows; r++) grid[r].pop();
-
-        // 2. Add Padding & Border
+        for(let r = 0; r < rows; r++) {
+            if (grid[r].length > 0) {
+                grid[r].pop();
+            }
+        }
+        
+        // 2. Add padding and border
+        let contentWidth = grid[0] ? grid[0].length : 0;
+        let totalWidth = contentWidth + (padding * 2) + (borderThickness * 2);
+        let totalHeight = rows + (padding * 2) + (borderThickness * 2);
+        
         let finalGrid = [];
-        let contentWidth = grid[0].length;
-        let totalWidth = contentWidth + (padding * 2) + 2; // +2 for border
-        let totalHeight = rows + (padding * 2) + 2;
-
-        // Top Border & Padding
-        finalGrid.push(Array(totalWidth).fill(2)); // Border Top
-        for(let p=0; p<padding; p++) finalGrid.push([2, ...Array(totalWidth-2).fill(0), 2]); // Padding
-
-        // Content Rows
-        for(let r=0; r<rows; r++) {
-            let row = [2]; // Left Border
-            for(let p=0; p<padding; p++) row.push(0); // Left Pad
-            row = row.concat(grid[r]); // Text
-            for(let p=0; p<padding; p++) row.push(0); // Right Pad
-            row.push(2); // Right Border
+        
+        // Top border
+        for(let b = 0; b < borderThickness; b++) {
+            finalGrid.push(Array(totalWidth).fill(2));
+        }
+        
+        // Top padding
+        for(let p = 0; p < padding; p++) {
+            let row = Array(borderThickness).fill(2);
+            row = row.concat(Array(totalWidth - (borderThickness * 2)).fill(0));
+            row = row.concat(Array(borderThickness).fill(2));
             finalGrid.push(row);
         }
-
-        // Bottom Padding & Border
-        for(let p=0; p<padding; p++) finalGrid.push([2, ...Array(totalWidth-2).fill(0), 2]); 
-        finalGrid.push(Array(totalWidth).fill(2)); // Border Bottom
-
+        
+        // Content rows
+        for(let r = 0; r < rows; r++) {
+            let row = Array(borderThickness).fill(2); // Left border
+            row = row.concat(Array(padding).fill(0)); // Left padding
+            row = row.concat(grid[r] || []); // Text
+            row = row.concat(Array(padding).fill(0)); // Right padding
+            row = row.concat(Array(borderThickness).fill(2)); // Right border
+            finalGrid.push(row);
+        }
+        
+        // Bottom padding
+        for(let p = 0; p < padding; p++) {
+            let row = Array(borderThickness).fill(2);
+            row = row.concat(Array(totalWidth - (borderThickness * 2)).fill(0));
+            row = row.concat(Array(borderThickness).fill(2));
+            finalGrid.push(row);
+        }
+        
+        // Bottom border
+        for(let b = 0; b < borderThickness; b++) {
+            finalGrid.push(Array(totalWidth).fill(2));
+        }
+        
         render(finalGrid);
-        calculateStats(finalGrid);
+        calculateStats(finalGrid, totalWidth, totalHeight);
     }
 
     function render(grid) {
         const canvas = document.getElementById('signCanvas');
         const ctx = canvas.getContext('2d');
-        const studSize = 25;
+        const studSize = 20;
         
         canvas.width = grid[0].length * studSize;
         canvas.height = grid.length * studSize;
-
-        for(let y=0; y<grid.length; y++) {
-            for(let x=0; x<grid[0].length; x++) {
+        
+        // Clear with background color
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-tertiary');
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        for(let y = 0; y < grid.length; y++) {
+            for(let x = 0; x < grid[0].length; x++) {
                 let val = grid[y][x];
-                let colorHex = bgColor.hex; // 0 = bg
-                if(val === 1) colorHex = textColor.hex;
-                if(val === 2) colorHex = borderColor.hex;
-
-                // Draw Stud
+                let colorHex;
+                
+                if(val === 1) colorHex = textColor.hex; // Text
+                else if(val === 2) colorHex = borderColor.hex; // Border
+                else colorHex = bgColor.hex; // Background
+                
+                // Draw brick stud
                 const px = x * studSize;
                 const py = y * studSize;
                 
-                // Base
+                // Base square
                 ctx.fillStyle = colorHex;
                 ctx.fillRect(px, py, studSize, studSize);
                 
-                // Stud Top
+                // Stud highlight effect
                 ctx.beginPath();
-                ctx.arc(px + studSize/2, py + studSize/2, studSize*0.35, 0, Math.PI*2);
-                ctx.fillStyle = 'rgba(0,0,0,0.1)'; // Shadow
+                ctx.arc(px + studSize/2, py + studSize/2, studSize * 0.35, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
                 ctx.fill();
                 
+                // Stud shadow effect
                 ctx.beginPath();
-                ctx.arc(px + studSize/2 - 2, py + studSize/2 - 2, studSize*0.35, 0, Math.PI*2);
-                ctx.fillStyle = 'rgba(255,255,255,0.2)'; // Highlight
+                ctx.arc(px + studSize/2 + 1, py + studSize/2 + 1, studSize * 0.35, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
                 ctx.fill();
                 
                 // Grid lines
-                ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.lineWidth = 0.5;
                 ctx.strokeRect(px, py, studSize, studSize);
             }
         }
     }
 
-    function calculateStats(grid) {
+    function calculateStats(grid, width, height) {
         let textCount = 0;
         let bgCount = 0;
         let borderCount = 0;
-
+        
         grid.flat().forEach(v => {
-            if(v===1) textCount++;
-            else if(v===2) borderCount++;
+            if(v === 1) textCount++;
+            else if(v === 2) borderCount++;
             else bgCount++;
         });
-
-        const html = `
-            <div class="stat-row"><span>${textColor.name} (Text):</span> <span>${textCount}</span></div>
-            <div class="stat-row"><span>${bgColor.name} (Back):</span> <span>${bgCount}</span></div>
-            <div class="stat-row"><span>${borderColor.name} (Border):</span> <span>${borderCount}</span></div>
-            <div class="stat-total">Total: ${textCount + bgCount + borderCount} studs</div>
-            <div style="font-size:0.7rem; color:#aaa; margin-top:5px">Dimensions: ${grid[0].length} x ${grid.length} studs</div>
+        
+        const totalBricks = textCount + bgCount + borderCount;
+        const costPerBrick = 0.05;
+        const totalCost = (totalBricks * costPerBrick).toFixed(2);
+        
+        // Update stats display
+        document.getElementById('text-count').textContent = textCount.toLocaleString();
+        document.getElementById('text-label').textContent = `${textColor.name}`;
+        
+        document.getElementById('bg-count').textContent = bgCount.toLocaleString();
+        document.getElementById('bg-label').textContent = `${bgColor.name}`;
+        
+        document.getElementById('border-count').textContent = borderCount.toLocaleString();
+        document.getElementById('border-label').textContent = `${borderColor.name}`;
+        
+        document.getElementById('dimensions').innerHTML = `
+            Dimensions: ${width}×${height} studs<br>
+            Est. Cost: <strong>$${totalCost}</strong> @ $${costPerBrick.toFixed(2)}/brick
         `;
-        document.getElementById('stats-panel').innerHTML = html;
     }
 
+    /* ---------- Export Functions ---------- */
     function downloadImage() {
         const canvas = document.getElementById('signCanvas');
+        const text = document.getElementById('text-input').value || 'sign';
         const link = document.createElement('a');
-        link.download = 'blockforge-sign.png';
+        link.download = `blockforge-sign-${text.toLowerCase()}.png`;
         link.href = canvas.toDataURL();
         link.click();
     }
 
-    function printGuide() {
-        const canvas = document.getElementById('signCanvas');
-        const win = window.open('', '_blank');
-        win.document.write(`
-            <html><head><title>Build Guide</title><style>body{font-family:sans-serif;text-align:center;}</style></head>
-            <body>
-            <h1>Sign Build Guide</h1>
-            ${document.getElementById('stats-panel').innerHTML}
-            <br><br>
-            <img src="${canvas.toDataURL()}" style="border:1px solid #ccc; max-width:100%;"/>
-            </body></html>
-        `);
-        win.print();
+    function downloadCSV() {
+        const text = document.getElementById('text-input').value || 'sign';
+        let csv = "type,color_name,color_hex,quantity\n";
+        
+        // Get counts from stats (simplified - in real app you'd calculate properly)
+        const textCount = parseInt(document.getElementById('text-count').textContent.replace(/,/g, ''));
+        const bgCount = parseInt(document.getElementById('bg-count').textContent.replace(/,/g, ''));
+        const borderCount = parseInt(document.getElementById('border-count').textContent.replace(/,/g, ''));
+        
+        csv += `text,${textColor.name},${textColor.hex},${textCount}\n`;
+        csv += `background,${bgColor.name},${bgColor.hex},${bgCount}\n`;
+        csv += `border,${borderColor.name},${borderColor.hex},${borderCount}\n`;
+        
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `blockforge-sign-${text.toLowerCase()}-parts.csv`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 100);
     }
 
-    init();
+    function printGuide() {
+        const canvas = document.getElementById('signCanvas');
+        const text = document.getElementById('text-input').value || 'SIGN';
+        const win = window.open('', '_blank');
+        
+        win.document.write(`
+            <html>
+            <head>
+                <title>BlockForge Sign Build Guide</title>
+                <style>
+                    body { 
+                        font-family: 'Work Sans', sans-serif;
+                        padding: 2rem;
+                        max-width: 800px;
+                        margin: 0 auto;
+                    }
+                    h1 { color: #333; margin-bottom: 1rem; }
+                    .stats { 
+                        background: #f8f9fa;
+                        padding: 1.5rem;
+                        border-radius: 8px;
+                        margin: 1rem 0;
+                    }
+                    img { 
+                        max-width: 100%;
+                        height: auto;
+                        border: 1px solid #ddd;
+                        border-radius: 8px;
+                        margin: 1rem 0;
+                    }
+                    .instructions {
+                        margin: 1.5rem 0;
+                        padding: 1rem;
+                        background: #fff8e1;
+                        border-radius: 8px;
+                        border-left: 4px solid #FF5722;
+                    }
+                    @media print {
+                        button { display: none; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>BlockForge Sign Build Guide</h1>
+                <div class="no-print">
+                    <button onclick="window.print()" style="padding: 0.5rem 1rem; background: #FF5722; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 1rem;">🖨️ Print Guide</button>
+                    <button onclick="window.close()" style="padding: 0.5rem 1rem; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 0.5rem;">❌ Close</button>
+                </div>
+                
+                <div class="stats">
+                    <h3>Sign: "${text}"</h3>
+                    ${document.getElementById('stats-panel').innerHTML}
+                </div>
+                
+                <h3>Layout Diagram</h3>
+                <img src="${canvas.toDataURL()}" />
+                
+                <div class="instructions">
+                    <h4>Build Instructions:</h4>
+                    <ol>
+                        <li>Start by building the border frame</li>
+                        <li>Fill in the background color</li>
+                        <li>Add text bricks using the diagram above</li>
+                        <li>Double-check alignment before final assembly</li>
+                    </ol>
+                </div>
+                
+                <p style="color: #666; font-size: 0.9rem;">
+                    Need help? Visit <strong>blockforgestudio.com/support</strong>
+                </p>
+            </body>
+            </html>
+        `);
+        win.document.close();
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
