@@ -11,11 +11,11 @@
             --navy: #0D2B3E; --steel: #1A4D6D; --orange: #FF5722; --white: #FFFFFF; --light: #F5F5F5;
         }
         * { box-sizing: border-box; }
-        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: var(--navy); margin: 0; height: 100vh; display: flex; }
+        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: var(--navy); margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
         /* Sidebar */
-        .sidebar { width: 350px; background: white; padding: 2rem; box-shadow: 4px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; z-index: 2; }
-        .logo { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; cursor: pointer; }
+        .sidebar { width: 350px; background: white; padding: 2rem; box-shadow: 4px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; z-index: 2; height: 100%; }
+        .logo { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; cursor: pointer; } /* This is now handled by partials */
         .logo span { color: var(--orange); }
         
         .control-group { margin-bottom: 1rem; }
@@ -26,16 +26,9 @@
         .color-picker { display: flex; gap: 10px; }
         .color-opt { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .color-opt.active { border-color: var(--navy); transform: scale(1.1); }
-        
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-top: 5px; }
-        .btn-primary { background: var(--orange); color: white; box-shadow: 0 4px 10px rgba(255,87,34,0.3); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(255,87,34,0.4); }
-        .btn-secondary { background: var(--steel); color: white; }
-        .btn-outline { background: transparent; border: 2px solid var(--navy); color: var(--navy); }
-        .btn-outline:hover { background: var(--navy); color: white; }
 
         /* Main Canvas Area */
-        .workspace { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px; }
+        .workspace { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px; height: 100%; }
         canvas { box-shadow: 0 10px 40px rgba(0,0,0,0.2); border-radius: 4px; max-width: 90%; max-height: 90%; }
         
         /* Stats Panel */
@@ -48,43 +41,45 @@
     </style>
 </head>
 <body>
-
-    <div class="sidebar">
-        <div class="logo" onclick="location.href='index.html'">BLOCK<span>FORGE</span></div>
-        
-        <div class="control-group">
-            <label>1. Enter Content</label>
-            <input type="text" id="qr-text" placeholder="https://..." value="https://blockforgestudio.com" oninput="generate()">
-            <div style="font-size: 0.7rem; color: #888; margin-top: 5px;">*Keep URLs short for simpler builds.</div>
-        </div>
-
-        <div class="control-group">
-            <label>2. Brick Colors</label>
-            <div style="margin-bottom: 10px; font-weight: 600;">Foreground (Code)</div>
-            <div class="color-picker" id="fg-picker">
-                </div>
-            <div style="margin-top: 15px; margin-bottom: 10px; font-weight: 600;">Background</div>
-            <div class="color-picker" id="bg-picker">
-                </div>
-        </div>
-
-        <div class="control-group">
-            <label>3. Plate Size</label>
-            <select id="plate-size" onchange="generate()">
-                <option value="32">32x32 Studs (Standard)</option>
-                <option value="48">48x48 Studs (Large)</option>
-            </select>
-        </div>
-
-        <div class="stats" id="stats-panel">
+    <div data-partial="nav" data-tool-title="QR Tool"></div>
+    <div style="display: flex; flex: 1; height: calc(100vh - 50px);">
+        <div class="sidebar">
+            <div class="logo" onclick="location.href='index.html'">BLOCK<span>FORGE</span></div>
+            
+            <div class="control-group">
+                <label>1. Enter Content</label>
+                <input type="text" id="qr-text" placeholder="https://..." value="https://blockforgestudio.com" oninput="generate()">
+                <div style="font-size: 0.7rem; color: #888; margin-top: 5px;">*Keep URLs short for simpler builds.</div>
             </div>
-
-        <button class="btn btn-primary" onclick="downloadImage()">📸 Download Image</button>
-        <button class="btn btn-outline" onclick="printGuide()">📄 Print Build Guide</button>
-    </div>
-
-    <div class="workspace">
-        <canvas id="brickCanvas"></canvas>
+    
+            <div class="control-group">
+                <label>2. Brick Colors</label>
+                <div style="margin-bottom: 10px; font-weight: 600;">Foreground (Code)</div>
+                <div class="color-picker" id="fg-picker">
+                    </div>
+                <div style="margin-top: 15px; margin-bottom: 10px; font-weight: 600;">Background</div>
+                <div class="color-picker" id="bg-picker">
+                    </div>
+            </div>
+    
+            <div class="control-group">
+                <label for="plate-size">3. Plate Size</label>
+                <select id="plate-size" onchange="generate()" aria-label="Plate Size">
+                    <option value="32">32x32 Studs (Standard)</option>
+                    <option value="48">48x48 Studs (Large)</option>
+                </select>
+            </div>
+    
+            <div class="stats" id="stats-panel">
+                </div>
+    
+            <button class="btn btn-primary" onclick="downloadImage()">📸 Download Image</button>
+            <button class="btn btn-outline" onclick="printGuide()">📄 Print Build Guide</button>
+        </div>
+    
+        <div class="workspace">
+            <canvas id="brickCanvas"></canvas>
+        </div>
     </div>
 
     <div id="qrcode"></div>
@@ -92,6 +87,7 @@
 <script>
     // --- Configuration ---
     const colors = [
+        // Using more vibrant, LEGO-like hex codes
         { name: 'Black', hex: '#1B2A34' },
         { name: 'White', hex: '#FFFFFF' },
         { name: 'Red', hex: '#C91A09' },
@@ -103,6 +99,8 @@
 
     let fgColor = colors[0]; // Black
     let bgColor = colors[1]; // White
+    let qr = null; // To hold the QRCode.js instance
+    let lastText = "";
     let qrData = []; // Array of arrays (0 or 1)
     
     // --- Init ---
@@ -141,12 +139,19 @@
     function generate() {
         const text = document.getElementById('qr-text').value || " ";
         const size = parseInt(document.getElementById('plate-size').value);
-        
+
+        // Avoid re-generating the core QR data if only colors change
+        if (text === lastText && qr) {
+            processQR(size); // Just re-render with new colors
+            return;
+        }
+        lastText = text;
+
         // 1. Generate Raw QR
         document.getElementById('qrcode').innerHTML = "";
         
         // We use a high correction level (H) to make it robust for bricks
-        new QRCode(document.getElementById('qrcode'), {
+        qr = new QRCode(document.getElementById('qrcode'), {
             text: text,
             width: size * 10, // Higher res for reading
             height: size * 10,

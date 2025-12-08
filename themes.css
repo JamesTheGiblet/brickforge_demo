@@ -1,0 +1,40 @@
+/* 
+    BlockForge Unified Theme Stylesheet
+    Defines CSS variables for light (default) and dark modes.
+*/
+
+:root {
+    /* Light Theme (Default) */
+    --bg-primary: linear-gradient(135deg, #F5F5F5 0%, #E8EEF2 100%);
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: #f8f9fa;
+    --bg-accent: #FFF3E0;
+    --bg-interactive: #f5f7fa;
+    --text-primary: #0D2B3E;
+    --text-secondary: #1A4D6D;
+    --text-muted: #666;
+    --text-inverted: #FFFFFF;
+    --accent-primary: #FF5722;
+    --accent-secondary: #1E88E5; /* Blue */
+    --border-primary: #ddd;
+    --shadow-primary: rgba(13, 43, 62, 0.15);
+    --icon-filter: invert(0);
+}
+
+body.dark-mode {
+    /* Dark Theme Overrides */
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-tertiary: #2a2a2a;
+    --bg-accent: #332a22;
+    --bg-interactive: #252525;
+    --text-primary: #eee;
+    --text-secondary: #bbb;
+    --text-muted: #888;
+    --text-inverted: #000000;
+    --accent-primary: #00d9ff; /* Cyan for dark mode */
+    --accent-secondary: #00ff99; /* Green for dark mode */
+    --border-primary: #333;
+    --shadow-primary: rgba(0, 0, 0, 0.5);
+    --icon-filter: invert(1);
+}

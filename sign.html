@@ -2,17 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="assets/blockforge.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockForge Sign Studio</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;600;800&display=swap" rel="stylesheet">
     <style>
+        /* Redundant #image-preview from copy-paste, can be removed */
+        #image-preview {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: none;
+            border: 2px solid #eee;
+            background: #f8f8f8;
+        }
         :root { --navy: #0D2B3E; --steel: #1A4D6D; --orange: #FF5722; --white: #FFFFFF; }
         * { box-sizing: border-box; }
-        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: var(--navy); margin: 0; height: 100vh; display: flex; }
+        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: var(--navy); margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
         /* Sidebar */
-        .sidebar { width: 350px; background: white; padding: 2rem; box-shadow: 4px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; z-index: 2; }
-        .logo { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; cursor: pointer; }
+        .sidebar { width: 350px; background: white; padding: 2rem; box-shadow: 4px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; z-index: 2; height: 100%; }
+        .logo { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; cursor: pointer; } /* This is now handled by partials */
         .logo span { color: var(--orange); }
         
         .control-group { margin-bottom: 1rem; }
@@ -23,15 +35,9 @@
         .color-picker { display: flex; gap: 10px; flex-wrap: wrap;}
         .color-opt { width: 35px; height: 35px; border-radius: 5px; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .color-opt.active { border-color: var(--navy); transform: scale(1.1); }
-        
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-top: 5px; }
-        .btn-primary { background: var(--orange); color: white; box-shadow: 0 4px 10px rgba(255,87,34,0.3); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(255,87,34,0.4); }
-        .btn-outline { background: transparent; border: 2px solid var(--navy); color: var(--navy); }
-        .btn-outline:hover { background: var(--navy); color: white; }
 
         /* Workspace */
-        .workspace { flex: 1; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px; padding: 20px; overflow: auto; }
+        .workspace { flex: 1; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px; padding: 20px; overflow: auto; height: 100%; }
         canvas { box-shadow: 0 10px 40px rgba(0,0,0,0.2); border-radius: 4px; max-width: 95%; }
         
         /* Stats */
@@ -41,41 +47,43 @@
     </style>
 </head>
 <body>
-
-    <div class="sidebar">
-        <div class="logo" onclick="location.href='index.html'">BLOCK<span>FORGE</span></div>
-        
-        <div class="control-group">
-            <label>1. Text (Max 12 chars)</label>
-            <input type="text" id="text-input" placeholder="JAMES" value="LEGO" maxlength="12" oninput="generate()">
+    <div data-partial="nav" data-tool-title="Sign Tool"></div>
+    <div style="display: flex; flex: 1; height: calc(100vh - 50px);">
+        <div class="sidebar">
+            <div class="logo" onclick="location.href='index.html'">BLOCK<span>FORGE</span></div>
+            
+            <div class="control-group">
+                <label>1. Text (Max 12 chars)</label>
+                <input type="text" id="text-input" placeholder="JAMES" value="LEGO" maxlength="12" oninput="generate()">
+            </div>
+    
+            <div class="control-group">
+                <label>2. Colors</label>
+                <div style="margin-bottom:5px; font-size:0.8rem;">Text Color</div>
+                <div class="color-picker" id="text-color-picker"></div>
+                <div style="margin-top:10px; margin-bottom:5px; font-size:0.8rem;">Background</div>
+                <div class="color-picker" id="bg-color-picker"></div>
+                <div style="margin-top:10px; margin-bottom:5px; font-size:0.8rem;">Border</div>
+                <div class="color-picker" id="border-color-picker"></div>
+            </div>
+    
+            <div class="control-group">
+                <label for="size-select">3. Height</label>
+                <select id="size-select" onchange="generate()">
+                    <option value="compact">Compact (7 studs high)</option>
+                    <option value="bold">Bold (9 studs high)</option>
+                </select>
+            </div>
+    
+            <div class="stats" id="stats-panel"></div>
+    
+            <button class="btn btn-primary" onclick="downloadImage()">📸 Download Design</button>
+            <button class="btn btn-outline" onclick="printGuide()">📄 Print Build Guide</button>
         </div>
-
-        <div class="control-group">
-            <label>2. Colors</label>
-            <div style="margin-bottom:5px; font-size:0.8rem;">Text Color</div>
-            <div class="color-picker" id="text-color-picker"></div>
-            <div style="margin-top:10px; margin-bottom:5px; font-size:0.8rem;">Background</div>
-            <div class="color-picker" id="bg-color-picker"></div>
-            <div style="margin-top:10px; margin-bottom:5px; font-size:0.8rem;">Border</div>
-            <div class="color-picker" id="border-color-picker"></div>
+    
+        <div class="workspace">
+            <canvas id="signCanvas"></canvas>
         </div>
-
-        <div class="control-group">
-            <label>3. Height</label>
-            <select id="size-select" onchange="generate()">
-                <option value="compact">Compact (7 studs high)</option>
-                <option value="bold">Bold (9 studs high)</option>
-            </select>
-        </div>
-
-        <div class="stats" id="stats-panel"></div>
-
-        <button class="btn btn-primary" onclick="downloadImage()">📸 Download Design</button>
-        <button class="btn btn-outline" onclick="printGuide()">📄 Print Build Guide</button>
-    </div>
-
-    <div class="workspace">
-        <canvas id="signCanvas"></canvas>
     </div>
 
 <script>
