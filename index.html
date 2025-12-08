@@ -191,6 +191,15 @@
                 </div>
             </div>
 
+            <!-- Import Panel -->
+            <div class="panel">
+                <h3>Import Custom Model</h3>
+                <p style="font-size: .875rem; color: #666; margin-bottom: 1rem;">Load a <code>model.json</code> file exported from the BlockForge desktop app.</p>
+                <label for="json-upload" style="display:block; margin-bottom:0.5rem;">Upload model.json file:</label>
+                <input type="file" id="json-upload" accept=".json" onchange="handleUpload(this)" style="width: 100%;" placeholder="Select model.json file" title="Select a model.json file to import">
+            </div>
+
+
             <!-- Brick Details -->
             <div class="panel" id="details-panel">
                 <h3>Brick Details</h3>
@@ -253,7 +262,7 @@
 
 <script>
 /* ---------- Global state & geometry constants ---------- */
-let scene, camera, renderer, bear;
+let scene, camera, renderer, bear, customModelData = null;
 let selectedColor = '#E53935', selectedColorName = 'Red';
 let isDragging = false, isMouseDown = false, previousMousePosition = {x:0,y:0};
 let raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
@@ -281,6 +290,17 @@ function getHexForColorName(name){
     const map = { Red:'#E53935', Blue:'#1E88E5', Yellow:'#FDD835', Green:'#43A047', Orange:'#FB8C00', White:'#FFFFFF', DarkRed:'#8B0000', Gray:'#808080' };
     return map[name] || '#8B0000';
 }
+
+// Color hex to name map (for imported models)
+const colorHexToName = {
+    '#e53935': 'Red', '#1e88e5': 'Blue', '#fdd835': 'Yellow', '#43a047': 'Green',
+    '#fb8c00': 'Orange', '#ffffff': 'White', '#8b0000': 'DarkRed', '#808080': 'Gray'
+};
+function getColorNameForHex(hex) {
+    const lowerHex = hex.toLowerCase();
+    return colorHexToName[lowerHex] || 'Custom';
+}
+
 
 // Utility to store voxel in integer grid coordinates
 function storeVoxel(ix, iy, iz, colorName){
@@ -732,17 +752,17 @@ function updateLayerVisibility(targetLayer) {
 }
 
 /* ---------- Create a single brick mesh from voxel run (centered) ---------- */
-function createBrickMesh(voxels, type, colorName){
+function createBrickMesh(voxels, type, colorName, hexColorOverride = null){
     const len = voxels.length; // 1,2,3
     // World dimensions
     const width = voxelUnit * len; // X dimension
     const height = voxelHeight;    // Y dimension
     const depth = voxelUnit;       // Z dimension
 
-    // The brick is now a group containing the base and studs
+    // The brick is a group containing the base and studs
     const brickGroup = new THREE.Group();
 
-    const material = new THREE.MeshStandardMaterial({ color: getHexForColorName(colorName), roughness:0.4, metalness:0.05 });
+    const material = new THREE.MeshStandardMaterial({ color: hexColorOverride || getHexForColorName(colorName), roughness:0.4, metalness:0.05 });
 
     // 1. Create the base box
     const baseGeom = new THREE.BoxGeometry(width, height, depth);
@@ -779,6 +799,13 @@ function createBrickMesh(voxels, type, colorName){
         voxels: voxels.map(v=>({x:v.x,y:v.y,z:v.z}))
     };
     bear.add(brickGroup);
+
+    // Update counts for the new brick
+    if (!blockCounts[colorName]) {
+        blockCounts[colorName] = { color: hexColorOverride || getHexForColorName(colorName), '1x3':0,'1x2':0,'1x1':0, total:0 };
+    }
+    blockCounts[colorName][type]++;
+    blockCounts[colorName].total++;
 }
 
 /* ---------- Selection & Highlighting ---------- */
@@ -1039,8 +1066,12 @@ async function generateInstructions() {
     `;
 
     const prevPos = camera.position.clone();
-    const prevTarget = new THREE.Vector3(0, 15, 0); // Assuming this is the orbit target
+    const prevTarget = new THREE.Vector3(0, 15, 0);
     camera.lookAt(prevTarget);
+
+    // Save and set renderer background to white
+    const prevBg = scene.background;
+    scene.background = new THREE.Color(0xffffff);
 
     // Temporarily add edges for instructions
     bear.children.forEach(brickGroup => {
@@ -1049,19 +1080,18 @@ async function generateInstructions() {
             const edgesGeom = new THREE.EdgesGeometry(baseMesh.geometry);
             const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1 });
             const edges = new THREE.LineSegments(edgesGeom, edgesMaterial);
-            edges.name = 'instruction_edge'; // Give it a name to find it later
+            edges.name = 'instruction_edge';
             baseMesh.add(edges);
         }
     });
 
     // Set a consistent isometric view for all steps
-    camera.position.set(0, 50, 25); // Bird's eye view
-    camera.lookAt(0, 20, 0); // Look at the vertical center of the bear
+    camera.position.set(0, 50, 25);
+    camera.lookAt(0, 20, 0);
 
     for (let i = 0; i <= maxLayer; i++) {
-        // Get parts for the current layer
         const layerBricks = bear.children.filter(b => b.userData.voxels[0].y === i);
-        if (layerBricks.length === 0) continue; // Skip empty layers
+        if (layerBricks.length === 0) continue;
 
         const layerParts = {};
         layerBricks.forEach(brick => {
@@ -1070,23 +1100,22 @@ async function generateInstructions() {
             layerParts[key].count++;
         });
 
-        // Generate parts list HTML for the step
         let partsHTML = '<div class="parts-list">';
         Object.values(layerParts).forEach(p => {
             partsHTML += `<div class="part">${p.count}x ${p.color} ${p.type}</div>`;
         });
         partsHTML += '</div>';
 
-        // Set visibility and capture image
-        updateLayerVisibility(i); // Update which bricks are visible
-        loadingIndicator.textContent = `Generating Instructions... Layer ${i + 1} / ${maxLayer + 1}`; // Update the text
-        renderer.render(scene, camera); // Render the scene once
-        await new Promise(resolve => setTimeout(resolve, 50)); // IMPORTANT: Wait for browser to repaint the screen
+        updateLayerVisibility(i);
+        loadingIndicator.textContent = `Generating Instructions... Layer ${i + 1} / ${maxLayer + 1}`;
+        renderer.render(scene, camera);
+        await new Promise(resolve => setTimeout(resolve, 50));
 
-        // Get the image data
+        // Ensure background is white before capturing
+        scene.background = new THREE.Color(0xffffff);
+        renderer.render(scene, camera);
         const imgData = renderer.domElement.toDataURL('image/png');
 
-        // Add to instruction document
         instructionHTML += `
             <div class="page">
                 <h2>Step ${i + 1} (Layer ${i})</h2>
@@ -1111,17 +1140,18 @@ async function generateInstructions() {
         }
     });
 
-    // Restore camera and visibility
+    // Restore camera, background, and visibility
     camera.position.copy(prevPos);
     camera.lookAt(prevTarget);
+    scene.background = prevBg;
     updateLayerVisibility(maxLayer);
-    
-    // Create a downloadable link and click it
+
     const blob = new Blob([instructionHTML], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'BlockForge-Instructions.html';
+    let modelName = currentModel || 'custom';
+    link.download = `BlockForge-Instructions-${modelName}.html`;
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
@@ -1208,6 +1238,56 @@ function init(){
     renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
     window.addEventListener('resize', onWindowResize);
 
+    // Touch events for mobile
+    let lastTouchDist = null;
+    let lastTouchPos = null;
+    renderer.domElement.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 1) {
+            lastTouchPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        } else if (e.touches.length === 2) {
+            lastTouchDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+        }
+    }, { passive: false });
+
+    renderer.domElement.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 1 && lastTouchPos) {
+            // Camera rotate
+            const deltaX = e.touches[0].clientX - lastTouchPos.x;
+            const deltaY = e.touches[0].clientY - lastTouchPos.y;
+            const target = new THREE.Vector3(0, 15, 0);
+            const offset = camera.position.clone().sub(target);
+            offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), deltaX * 0.005);
+            offset.applyAxisAngle(camera.getWorldDirection(new THREE.Vector3()).cross(new THREE.Vector3(0, 1, 0)), (invertY ? -deltaY : deltaY) * 0.005);
+            camera.position.copy(target).add(offset);
+            camera.lookAt(target);
+            lastTouchPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            e.preventDefault();
+        } else if (e.touches.length === 2) {
+            // Pinch to zoom
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            if (lastTouchDist !== null) {
+                const zoomFactor = (dist - lastTouchDist) * 0.05;
+                const target = new THREE.Vector3(0, 15, 0);
+                const dir = target.clone().sub(camera.position).normalize();
+                camera.position.addScaledVector(dir, -zoomFactor);
+                camera.lookAt(target);
+            }
+            lastTouchDist = dist;
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    renderer.domElement.addEventListener('touchend', function(e) {
+        lastTouchDist = null;
+        lastTouchPos = null;
+    });
+
     // Palette buttons
     document.querySelectorAll('.color-btn').forEach(btn=>{
         btn.addEventListener('click', ()=>{
@@ -1248,6 +1328,58 @@ function onEllipsoidSurface(x,y,z,cx,cy,cz,rx,ry,rz,thickness=0.8){
 
 // Start
 init();
+
+/* ---------- Import Custom Model from JSON ---------- */
+function handleUpload(input) {
+    const file = input.files[0];
+    if (!file) {
+        alert('No file selected.');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const json = JSON.parse(e.target.result);
+            loadModelFromJSON(json);
+        } catch (err) {
+            alert('Error parsing JSON: ' + err.message);
+        }
+    };
+    reader.onerror = function() {
+        alert('Error reading file.');
+    };
+    reader.readAsText(file);
+}
+
+function loadModelFromJSON(json) {
+    // Validate structure
+    if (!json || !Array.isArray(json.voxels)) {
+        alert('Invalid model format: missing voxels array.');
+        return;
+    }
+    voxelGrid = {};
+    if (bear) scene.remove(bear);
+    bear = new THREE.Group();
+    blockCounts = {};
+
+    // Accept color as name or hex
+    json.voxels.forEach(v => {
+        let colorName = v.colorName;
+        if (!colorName && v.color) {
+            // Try to map hex to name
+            colorName = getColorNameForHex(v.color);
+        }
+        if (!colorName) colorName = 'Red'; // Default fallback
+        storeVoxel(v.x, v.y, v.z, colorName);
+    });
+
+    buildBricksFromVoxels();
+    resetCamera();
+    renderBlockCountUI();
+    currentModel = 'custom';
+    document.querySelector('.hero h1').textContent = 'Design Your Custom Model';
+    document.querySelectorAll('.model-btn').forEach(btn => btn.classList.remove('active'));
+}
 </script>
 </body>
 </html>
