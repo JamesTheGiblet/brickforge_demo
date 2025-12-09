@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>Architect Studio - BlockForge | Premium Real Estate Models</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
@@ -43,7 +45,7 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+
     body { 
       font-family: 'Work Sans', sans-serif; 
       background: var(--bg-primary); 
@@ -51,12 +53,14 @@
       overflow-x: hidden;
       transition: background 0.3s, color 0.3s;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     /* Premium Navigation */
     .nav-hub {
       background: var(--bg-secondary);
-      padding: 15px 30px;
+      padding: 15px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -65,12 +69,13 @@
       top: 0;
       z-index: 1000;
       border-bottom: 2px solid var(--premium-gold);
+      gap: 10px;
     }
 
     .nav-hub-title {
       font-family: 'Space Mono', monospace;
       font-weight: bold;
-      font-size: 1.3rem;
+      font-size: clamp(1rem, 3vw, 1.3rem);
       color: var(--text-primary);
       -webkit-user-select: none;
       user-select: none;
@@ -78,6 +83,8 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      flex: 1;
+      min-width: 0;
     }
 
     .nav-hub-title span {
@@ -89,18 +96,19 @@
       color: var(--text-inverted);
       padding: 2px 8px;
       border-radius: 4px;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 800;
       letter-spacing: 1px;
       text-transform: uppercase;
       margin-left: 0.5rem;
+      white-space: nowrap;
     }
 
     .theme-toggle-btn {
       background: transparent;
       border: 2px solid var(--premium-gold);
       color: var(--text-primary);
-      padding: 8px 12px;
+      padding: 8px;
       cursor: pointer;
       border-radius: 6px;
       font-size: 1.2rem;
@@ -110,18 +118,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
+      touch-action: manipulation;
     }
 
-    .theme-toggle-btn:hover {
+    .theme-toggle-btn:hover, .theme-toggle-btn:active {
       background: var(--premium-gold);
-      transform: scale(1.1);
+      transform: scale(1.05);
     }
 
     .nav-hub-btn {
       background: transparent;
       border: 2px solid var(--premium-gold);
       color: var(--premium-gold);
-      padding: 8px 20px;
+      padding: 8px 16px;
       cursor: pointer;
       border-radius: 6px;
       font-weight: 600;
@@ -130,9 +140,13 @@
       text-decoration: none;
       display: flex;
       align-items: center;
+      white-space: nowrap;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      touch-action: manipulation;
     }
 
-    .nav-hub-btn:hover {
+    .nav-hub-btn:hover, .nav-hub-btn:active {
       background: var(--premium-gold);
       color: var(--text-inverted);
       transform: translateY(-2px);
@@ -141,7 +155,7 @@
     /* Premium Hero Section */
     .hero {
       background: linear-gradient(135deg, #0D2B3E 0%, #1A4D6D 50%, #D4AF37 100%);
-      padding: 5rem 2rem 4rem;
+      padding: 3rem 1.5rem 2.5rem;
       text-align: center;
       color: white;
       position: relative;
@@ -174,7 +188,7 @@
     }
 
     .hero h1 {
-      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-size: clamp(2rem, 8vw, 4rem);
       font-weight: 800;
       margin-bottom: 1rem;
       letter-spacing: -1px;
@@ -183,16 +197,16 @@
     }
 
     .hero .tagline {
-      font-size: clamp(1.2rem, 2vw, 1.8rem);
+      font-size: clamp(1rem, 4vw, 1.8rem);
       font-family: 'Space Mono', monospace;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       opacity: 0.9;
       opacity: 0;
       animation: fadeInUp 0.8s ease 0.2s forwards;
     }
 
     .hero .subtitle {
-      font-size: 1.1rem;
+      font-size: clamp(0.95rem, 2.5vw, 1.1rem);
       max-width: 800px;
       margin: 0 auto 2rem;
       line-height: 1.6;
@@ -215,21 +229,21 @@
     /* Value Proposition Cards */
     .value-props {
       max-width: 1200px;
-      margin: -3rem auto 2rem;
-      padding: 0 2rem;
+      margin: -2rem auto 2rem;
+      padding: 0 1.5rem;
       position: relative;
       z-index: 2;
     }
 
     .value-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+      gap: 1rem;
     }
 
     .value-card {
       background: var(--bg-secondary);
-      padding: 2rem;
+      padding: 1.5rem;
       border-radius: 16px;
       box-shadow: 0 8px 30px var(--shadow-primary);
       border: 2px solid var(--premium-gold);
@@ -256,9 +270,9 @@
       }
     }
 
-    .value-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 40px var(--shadow-primary);
+    .value-card:hover, .value-card:active {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px var(--shadow-primary);
     }
 
     .value-icon {
@@ -271,13 +285,13 @@
     }
 
     .value-card h3 {
-      font-size: 1.25rem;
+      font-size: clamp(1.1rem, 3vw, 1.25rem);
       margin-bottom: 0.75rem;
       color: var(--text-primary);
     }
 
     .value-card p {
-      font-size: 0.95rem;
+      font-size: clamp(0.85rem, 2vw, 0.95rem);
       color: var(--text-muted);
       line-height: 1.5;
     }
@@ -285,20 +299,21 @@
     /* Main Container */
     .main-container {
       max-width: 1400px;
-      margin: 4rem auto;
-      padding: 0 2rem;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
     }
 
     .workspace {
       display: grid;
-      grid-template-columns: 400px 1fr;
-      gap: 2rem;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
       margin-top: 2rem;
     }
 
-    @media (max-width: 968px) {
+    @media (min-width: 968px) {
       .workspace {
-        grid-template-columns: 1fr;
+        grid-template-columns: 400px 1fr;
+        gap: 2rem;
       }
     }
 
@@ -306,7 +321,7 @@
     .panel {
       background: var(--bg-secondary);
       border-radius: 16px;
-      padding: 2rem;
+      padding: 1.5rem;
       box-shadow: 0 4px 20px var(--shadow-primary);
       border: 2px solid var(--border-primary);
       opacity: 0;
@@ -320,7 +335,7 @@
     }
 
     .panel h2 {
-      font-size: 1.5rem;
+      font-size: clamp(1.25rem, 4vw, 1.5rem);
       font-weight: 700;
       margin-bottom: 1.5rem;
       color: var(--text-primary);
@@ -361,9 +376,11 @@
       font-family: 'Work Sans', sans-serif;
       margin-top: 0.5rem;
       cursor: pointer;
+      font-size: 0.9rem;
+      touch-action: manipulation;
     }
 
-    input[type="file"]:hover {
+    input[type="file"]:hover, input[type="file"]:active {
       border-color: var(--premium-gold);
     }
 
@@ -378,61 +395,67 @@
       font-family: 'Work Sans', sans-serif;
       font-weight: 600;
       transition: all 0.3s;
+      touch-action: manipulation;
     }
 
-    input[type="file"]::file-selector-button:hover {
+    input[type="file"]::file-selector-button:hover,
+    input[type="file"]::file-selector-button:active {
       transform: translateY(-1px);
     }
 
     input[type="range"] {
       width: 100%;
-      height: 6px;
+      height: 8px;
       cursor: pointer;
       background: var(--bg-tertiary);
-      border-radius: 3px;
+      border-radius: 4px;
       outline: none;
       -webkit-appearance: none;
       appearance: none;
+      touch-action: manipulation;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: var(--premium-gold);
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(212, 175, 55, 0.4);
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.5);
       transition: all 0.3s;
     }
 
-    input[type="range"]::-webkit-slider-thumb:hover {
+    input[type="range"]::-webkit-slider-thumb:hover,
+    input[type="range"]::-webkit-slider-thumb:active {
       transform: scale(1.2);
     }
 
     input[type="range"]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: var(--premium-gold);
       cursor: pointer;
       border: none;
-      box-shadow: 0 2px 6px rgba(212, 175, 55, 0.4);
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.5);
     }
 
-    select, textarea {
+    select, textarea, input[type="text"], input[type="date"], input[type="number"] {
       background: var(--bg-tertiary);
       border: 1px solid var(--border-primary);
       color: var(--text-primary);
-      padding: 0.75rem;
+      padding: 0.875rem;
       border-radius: 8px;
       width: 100%;
       box-sizing: border-box;
       font-family: 'Work Sans', sans-serif;
       transition: all 0.3s;
+      font-size: 1rem;
+      touch-action: manipulation;
     }
 
-    select:focus, textarea:focus {
+    select:focus, textarea:focus, input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus {
       outline: none;
       border-color: var(--premium-gold);
       box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
@@ -459,9 +482,10 @@
       border: 1px solid var(--border-primary);
       transition: all 0.3s;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
-    .checkbox-row:hover {
+    .checkbox-row:hover, .checkbox-row:active {
       background: var(--bg-secondary);
       transform: translateY(-1px);
       border-color: var(--premium-gold);
@@ -469,10 +493,12 @@
 
     .checkbox-row input {
       margin: 0;
-      width: 18px;
-      height: 18px;
+      width: 22px;
+      height: 22px;
       cursor: pointer;
       accent-color: var(--premium-gold);
+      flex-shrink: 0;
+      touch-action: manipulation;
     }
 
     .checkbox-row label {
@@ -520,6 +546,12 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
     }
 
     .btn-premium {
@@ -528,9 +560,13 @@
       box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
     }
 
-    .btn-premium:hover {
+    .btn-premium:hover, .btn-premium:active {
       transform: translateY(-2px);
       box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
+    }
+
+    .btn-premium:active {
+      transform: scale(0.98);
     }
 
     .btn-primary {
@@ -539,9 +575,13 @@
       box-shadow: 0 6px 20px rgba(255, 87, 34, 0.4);
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover, .btn-primary:active {
       transform: translateY(-2px);
       box-shadow: 0 8px 30px rgba(255, 87, 34, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
     }
 
     .btn-secondary {
@@ -550,11 +590,15 @@
       border: 2px solid var(--border-primary);
     }
 
-    .btn-secondary:hover {
+    .btn-secondary:hover, .btn-secondary:active {
       background: var(--premium-gold);
       color: white;
       border-color: var(--premium-gold);
       transform: translateY(-2px);
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.98);
     }
 
     /* Client Info Section */
@@ -583,50 +627,90 @@
     .preview-area {
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 1.5rem;
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      border: 2px solid var(--border-primary);
+      overflow: hidden;
+      touch-action: pan-x pan-y pinch-zoom;
     }
 
     #preview-canvas {
       width: 100%;
-      height: 400px;
-      border-radius: 12px;
-      background: var(--bg-tertiary);
-      box-shadow: 0 4px 20px var(--shadow-primary);
+      height: auto;
+      min-height: 300px;
       display: block;
-      border: 2px solid var(--border-primary);
+      touch-action: none;
+    }
+
+    .canvas-controls {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    .canvas-btn {
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      touch-action: manipulation;
+      backdrop-filter: blur(10px);
+    }
+
+    .canvas-btn:active {
+      transform: scale(0.95);
+      background: rgba(212, 175, 55, 0.9);
     }
 
     /* Model Stats */
     .model-stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
 
     .stat-box {
       background: linear-gradient(135deg, var(--premium-gold) 0%, var(--premium-silver) 100%);
-      padding: 1.25rem;
+      padding: 1rem;
       border-radius: 12px;
       text-align: center;
       color: var(--text-inverted);
       transition: all 0.3s;
+      touch-action: manipulation;
     }
 
-    .stat-box:hover {
+    .stat-box:active {
       transform: translateY(-2px);
       box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
     }
 
     .stat-val {
-      font-size: 2rem;
+      font-size: clamp(1.5rem, 5vw, 2rem);
       font-weight: 800;
       font-family: 'Space Mono', monospace;
       line-height: 1;
     }
 
     .stat-label {
-      font-size: 0.75rem;
+      font-size: clamp(0.7rem, 2vw, 0.75rem);
       opacity: 0.9;
       margin-top: 0.5rem;
       text-transform: uppercase;
@@ -637,13 +721,16 @@
     .bom-scroll {
       max-height: 300px;
       overflow-y: auto;
+      overflow-x: auto;
       border: 1px solid var(--border-primary);
       border-radius: 8px;
       background: var(--bg-tertiary);
+      -webkit-overflow-scrolling: touch;
     }
 
     .bom-scroll::-webkit-scrollbar {
       width: 8px;
+      height: 8px;
     }
 
     .bom-scroll::-webkit-scrollbar-track {
@@ -659,7 +746,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.9rem;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
     }
 
     th {
@@ -675,6 +762,7 @@
       letter-spacing: 0.5px;
       z-index: 1;
       border-bottom: 2px solid var(--premium-gold);
+      white-space: nowrap;
     }
 
     td {
@@ -687,7 +775,7 @@
       border-bottom: none;
     }
 
-    tr:hover {
+    tr:active {
       background: var(--bg-secondary);
     }
 
@@ -702,131 +790,68 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    /* Professional Features */
-    .features-section {
-      margin-top: 3rem;
-      padding: 2rem;
-      background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
-      border-radius: 16px;
-      border: 2px solid var(--premium-gold);
-    }
-
-    .features-section h3 {
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-      color: var(--text-primary);
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .features-section h3::before {
-      content: '🏆';
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-
-    .feature-item {
-      background: var(--bg-secondary);
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid var(--border-primary);
-      transition: all 0.3s;
-    }
-
-    .feature-item:hover {
-      transform: translateY(-4px);
-      border-color: var(--premium-gold);
-      box-shadow: 0 6px 20px var(--shadow-primary);
-    }
-
-    .feature-item h4 {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .feature-item p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    /* Call to Action */
-    .cta-section {
-      background: linear-gradient(135deg, #0D2B3E 0%, #1A4D6D 100%);
-      padding: 3rem 2rem;
-      border-radius: 16px;
-      margin-top: 3rem;
-      text-align: center;
-      color: white;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cta-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 30% 50%, rgba(212, 175, 55, 0.2) 0%, transparent 50%);
-    }
-
-    .cta-content {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .cta-section h3 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    .cta-section p {
-      font-size: 1.1rem;
-      opacity: 0.9;
-      margin-bottom: 2rem;
-      line-height: 1.6;
-    }
-
-    /* Responsive */
+    /* Responsive Adjustments */
     @media (max-width: 768px) {
-      .model-stats {
-        grid-template-columns: 1fr;
-      }
-      
       .hero {
-        padding: 3rem 1rem 2rem;
+        padding: 2.5rem 1rem 2rem;
       }
-      
+
       .main-container {
+        margin: 1.5rem auto;
         padding: 0 1rem;
       }
-      
+
       .panel {
-        padding: 1.5rem;
+        padding: 1.25rem;
       }
-      
-      .value-grid {
-        grid-template-columns: 1fr;
-      }
-      
+
       .value-props {
-        margin-top: 1rem;
+        margin: -1.5rem auto 1.5rem;
+      }
+
+      .nav-hub {
+        padding: 12px 15px;
+      }
+
+      .premium-badge {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+      }
+
+      #preview-canvas {
+        min-height: 250px;
+      }
+
+      .canvas-controls {
+        bottom: 0.5rem;
+        right: 0.5rem;
+      }
+
+      .canvas-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-hub-title {
+        font-size: 0.9rem;
+      }
+
+      .nav-hub-btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
+
+      .theme-toggle-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+      }
+
+      .model-stats {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -844,6 +869,12 @@
       align-items: center;
       flex-direction: column;
       color: white;
+      padding: 1rem;
+    }
+
+    .loading p {
+      text-align: center;
+      max-width: 300px;
     }
 
     .spinner {
@@ -858,6 +889,25 @@
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    /* Touch feedback */
+    @media (hover: none) {
+      .btn:hover {
+        transform: none;
+      }
+
+      .value-card:hover {
+        transform: translateY(0);
+      }
+
+      .nav-hub-btn:hover {
+        transform: translateY(0);
+      }
+
+      .theme-toggle-btn:hover {
+        transform: scale(1);
+      }
     }
   </style>
 </head>
@@ -877,7 +927,7 @@
     <div class="hero-content">
       <h1>Architect Studio</h1>
       <p class="tagline">Transform Real Estate into Buildable Art</p>
-      <p class="subtitle">Create stunning, custom LEGO architectural models from house photos. Perfect for realtors, closing gifts, and premium client presentations.</p>
+      <p class="subtitle">Create stunning, custom LEGO architectural mosaics from house photos using only 1x3, 1x2, and 1x1 tiles. Perfect for realtors, closing gifts, and premium client presentations.</p>
     </div>
   </section>
 
@@ -887,22 +937,22 @@
       <div class="value-card">
         <div class="value-icon">🏆</div>
         <h3>Premium Closing Gifts</h3>
-        <p>Impress clients with unique, personalized architectural models that commemorate their new home.</p>
+        <p>Impress clients with unique, personalized architectural mosaics that commemorate their new home.</p>
       </div>
       <div class="value-card">
         <div class="value-icon">📐</div>
-        <h3>Architectural Precision</h3>
-        <p>Convert any house photo into a detailed, buildable 3D model with accurate proportions and features.</p>
+        <h3>Tile-Based Precision</h3>
+        <p>Convert any house photo into a detailed mosaic using optimized 1x3, 1x2, and 1x1 LEGO tiles.</p>
       </div>
       <div class="value-card">
         <div class="value-icon">🎁</div>
         <h3>Turnkey Solution</h3>
-        <p>We handle everything: model generation, brick sourcing, and custom packaging for realtors.</p>
+        <p>We handle everything: mosaic generation, tile sourcing, and custom packaging for realtors.</p>
       </div>
       <div class="value-card">
         <div class="value-icon">🚀</div>
         <h3>Fast Turnaround</h3>
-        <p>Generate and order custom architectural models in minutes, delivered to your clients in days.</p>
+        <p>Generate and order custom architectural mosaics in minutes, delivered to your clients in days.</p>
       </div>
     </div>
   </div>
@@ -912,49 +962,47 @@
     <div class="workspace">
       <!-- Configuration Panel -->
       <div class="panel premium">
-        <h2>Architectural Model Setup</h2>
-        
+        <h2>Mosaic Configuration</h2>
+
         <label>House Photo Upload</label>
         <input id="file" type="file" accept="image/*" title="Upload front-facing house photo">
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
           Upload a clear, front-facing photo of the house. Best results with straight-on shots in good lighting.
         </p>
 
-        <label>Model Detail Level</label>
-        <input id="detail" type="range" min="1" max="10" value="7" title="Model Detail Level">
-        <div class="range-value"><span id="detail-val">7</span>/10</div>
+        <label>Mosaic Width (studs)</label>
+        <input id="width" type="range" min="32" max="128" value="64" step="8" title="Mosaic Width">
+        <div class="range-value"><span id="width-val">64</span> studs wide</div>
 
-        <label>Architectural Style</label>
-        <select id="style" title="Select architectural style">
-          <option value="modern">Modern Contemporary</option>
-          <option value="traditional">Traditional</option>
-          <option value="colonial">Colonial</option>
-          <option value="victorian">Victorian</option>
-          <option value="ranch">Ranch Style</option>
-          <option value="custom">Custom Design</option>
+        <label>Color Palette</label>
+        <select id="palette" title="Select color palette">
+          <option value="architectural">Architectural (Natural)</option>
+          <option value="vibrant">Vibrant (Bold)</option>
+          <option value="monochrome">Monochrome (Black & White)</option>
+          <option value="earth">Earth Tones</option>
         </select>
 
-        <label>Base Size (inches)</label>
-        <select id="base-size" title="Select base size for architectural model">
-          <option value="8x8">8" × 8" (Small)</option>
-          <option value="12x12" selected>12" × 12" (Standard)</option>
-          <option value="16x16">16" × 16" (Large)</option>
-          <option value="20x20">20" × 20" (Premium)</option>
+        <label>Mosaic Style</label>
+        <select id="mosaic-style" title="Select mosaic style">
+          <option value="realistic">Realistic Detail</option>
+          <option value="simplified">Simplified</option>
+          <option value="artistic">Artistic</option>
+          <option value="blueprint">Blueprint Style</option>
         </select>
 
         <div class="checkbox-row">
-          <input id="include-trees" type="checkbox" checked>
-          <label for="include-trees">
-            <strong>Include Landscaping</strong>
-            <span>Add trees, shrubs, and basic landscaping elements</span>
+          <input id="show-grid" type="checkbox" checked>
+          <label for="show-grid">
+            <strong>Show Grid Lines</strong>
+            <span>Display tile boundaries on the mosaic</span>
           </label>
         </div>
 
         <div class="checkbox-row">
-          <input id="include-fence" type="checkbox">
-          <label for="include-fence">
-            <strong>Include Fence</strong>
-            <span>Add picket fence or boundary elements</span>
+          <input id="optimize-tiles" type="checkbox" checked>
+          <label for="optimize-tiles">
+            <strong>Optimize Tiles</strong>
+            <span>Use larger tiles (1x3, 1x2) where possible to reduce piece count</span>
           </label>
         </div>
 
@@ -963,26 +1011,37 @@
           <h3>Client Information (For Plaque)</h3>
           <label>Client Name(s)</label>
           <input type="text" id="client-name" placeholder="The Johnson Family" style="margin-bottom: 1rem;">
-          
+
           <label>Property Address</label>
           <input type="text" id="property-address" placeholder="123 Maple Street, Anytown, USA">
-          
+
           <label>Closing Date</label>
           <input type="date" id="closing-date" style="margin-bottom: 1rem;" title="Select closing date" placeholder="MM/DD/YYYY">
-          
+
           <label>Realtor/Company Name</label>
           <input type="text" id="realtor-name" placeholder="Your Realty Company">
         </div>
 
         <div class="controls">
-          <button id="generate" class="btn btn-premium">🏠 Generate Model</button>
-          <button id="order" class="btn btn-primary" style="display:none">📦 Order Model ($249)</button>
+          <button id="generate" class="btn btn-premium">🧱 Generate Mosaic</button>
+          <button id="order" class="btn btn-primary" style="display:none">📦 Order Mosaic ($249)</button>
         </div>
-        
+
         <div class="actions-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-primary);">
           <h2>Export Options</h2>
+          
+          <label>Instructions Format</label>
+          <select id="instructions-format" title="Select instruction format">
+            <option value="pdf">Full PDF Guide (Layered)</option>
+            <option value="txt">Text Instructions</option>
+            <option value="both">Both PDF + Text</option>
+          </select>
+
+          <label>Rows Per Page</label>
+          <input id="rows-per-page" type="number" min="5" max="20" value="10" placeholder="10" title="Rows per instruction page">
+
           <div class="controls">
-            <button id="downloadPNG" class="btn btn-secondary">📸 Save Render</button>
+            <button id="downloadPNG" class="btn btn-secondary">📸 Save Mosaic</button>
             <button id="downloadCSV" class="btn btn-secondary">📄 Parts List</button>
             <button id="downloadInstructions" class="btn btn-secondary">📖 Build Guide</button>
           </div>
@@ -992,67 +1051,41 @@
       <!-- Preview & Stats -->
       <div class="preview-area">
         <div class="panel">
-          <h2>Architectural Preview</h2>
-          <canvas id="preview-canvas"></canvas>
+          <h2>Mosaic Preview</h2>
+          <div class="canvas-container">
+            <canvas id="preview-canvas" width="800" height="600"></canvas>
+            <div class="canvas-controls">
+              <button class="canvas-btn" id="zoom-in" title="Zoom In">➕</button>
+              <button class="canvas-btn" id="zoom-out" title="Zoom Out">➖</button>
+              <button class="canvas-btn" id="reset-view" title="Reset View">🔄</button>
+            </div>
+          </div>
         </div>
 
         <div class="panel" id="stats-panel" style="display:none">
-          <h2>Model Specifications</h2>
+          <h2>Mosaic Specifications</h2>
           <div class="model-stats">
             <div class="stat-box">
-              <div class="stat-val" id="total-bricks">0</div>
-              <div class="stat-label">Total Bricks</div>
+              <div class="stat-val" id="total-tiles">0</div>
+              <div class="stat-label">Total Tiles</div>
             </div>
             <div class="stat-box">
-              <div class="stat-val" id="model-size">0"</div>
-              <div class="stat-label">Model Size</div>
+              <div class="stat-val" id="mosaic-size">0×0</div>
+              <div class="stat-label">Size (studs)</div>
             </div>
             <div class="stat-box">
-              <div class="stat-val" id="model-weight">0 lbs</div>
-              <div class="stat-label">Approx. Weight</div>
+              <div class="stat-val" id="unique-colors">0</div>
+              <div class="stat-label">Colors Used</div>
             </div>
           </div>
-          
+
           <div class="bom-scroll">
             <table id="bom-table">
-              <thead><tr><th>Component</th><th>Color</th><th>Quantity</th></tr></thead>
+              <thead><tr><th>Tile Size</th><th>Color</th><th>Quantity</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Professional Features -->
-    <div class="features-section">
-      <h3>Why Architects & Realtors Choose BlockForge</h3>
-      <div class="features-grid">
-        <div class="feature-item">
-          <h4>🎯 Custom Branding</h4>
-          <p>Include your realty logo, contact information, and personalized message on the display base.</p>
-        </div>
-        <div class="feature-item">
-          <h4>📦 Complete Kits</h4>
-          <p>We source all bricks, provide step-by-step instructions, and include display case options.</p>
-        </div>
-        <div class="feature-item">
-          <h4>⏱️ 5-Day Production</h4>
-          <p>From photo to doorstep in less than a week. Rush 2-day service available.</p>
-        </div>
-        <div class="feature-item">
-          <h4>🏢 Bulk Discounts</h4>
-          <p>Special pricing for realty firms ordering 5+ models per month. Volume pricing available.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Call to Action -->
-    <div class="cta-section">
-      <div class="cta-content">
-        <h3>Ready to Impress Your Clients?</h3>
-        <p>Join hundreds of successful realtors who use BlockForge architectural models as their signature closing gift. Average client satisfaction: 4.9/5 stars.</p>
-        <button class="btn btn-premium" style="width: auto; padding: 1rem 3rem;">📞 Schedule Demo</button>
-        <p style="font-size: 0.9rem; margin-top: 1rem; opacity: 0.8;">Free sample model for qualified realty firms</p>
       </div>
     </div>
   </div>
@@ -1060,11 +1093,86 @@
   <!-- Loading Overlay -->
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <p>Generating Architectural Model...</p>
-    <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Analyzing architectural features and generating 3D model</p>
+    <p>Generating LEGO Mosaic...</p>
+    <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Analyzing image and optimizing tile placement</p>
   </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
+/* ---------- LEGO Tile Color Palettes ---------- */
+const LEGO_PALETTES = {
+  architectural: [
+    {name: "White", hex: "#F4F4F4"},
+    {name: "Light Gray", hex: "#9BA19D"},
+    {name: "Dark Gray", hex: "#6C6E68"},
+    {name: "Black", hex: "#1B2A34"},
+    {name: "Tan", hex: "#E4CD9E"},
+    {name: "Dark Tan", hex: "#958A73"},
+    {name: "Brown", hex: "#583927"},
+    {name: "Dark Brown", hex: "#352100"},
+    {name: "Red", hex: "#C91A09"},
+    {name: "Dark Red", hex: "#720E0F"},
+    {name: "Blue", hex: "#0055BF"},
+    {name: "Dark Blue", hex: "#0A3463"},
+    {name: "Green", hex: "#237841"},
+    {name: "Dark Green", hex: "#184632"}
+  ],
+  vibrant: [
+    {name: "Bright Red", hex: "#C91A09"},
+    {name: "Bright Blue", hex: "#0055BF"},
+    {name: "Bright Green", hex: "#237841"},
+    {name: "Bright Yellow", hex: "#F2CD37"},
+    {name: "Orange", hex: "#FE8A18"},
+    {name: "Purple", hex: "#81007B"},
+    {name: "Pink", hex: "#FC97AC"},
+    {name: "White", hex: "#F4F4F4"},
+    {name: "Black", hex: "#1B2A34"},
+    {name: "Light Blue", hex: "#B4D2E3"},
+    {name: "Lime Green", hex: "#BBE90B"}
+  ],
+  monochrome: [
+    {name: "White", hex: "#F4F4F4"},
+    {name: "Very Light Gray", hex: "#E6E3E0"},
+    {name: "Light Gray", hex: "#9BA19D"},
+    {name: "Medium Gray", hex: "#6C6E68"},
+    {name: "Dark Gray", hex: "#4C5156"},
+    {name: "Very Dark Gray", hex: "#2E3137"},
+    {name: "Black", hex: "#1B2A34"}
+  ],
+  earth: [
+    {name: "Tan", hex: "#E4CD9E"},
+    {name: "Dark Tan", hex: "#958A73"},
+    {name: "Brown", hex: "#583927"},
+    {name: "Dark Brown", hex: "#352100"},
+    {name: "Sand Green", hex: "#A0BCAC"},
+    {name: "Olive Green", hex: "#9B9A5A"},
+    {name: "Dark Green", hex: "#184632"},
+    {name: "Earth Orange", hex: "#D67240"},
+    {name: "Reddish Brown", hex: "#582A12"},
+    {name: "White", hex: "#F4F4F4"},
+    {name: "Light Gray", hex: "#9BA19D"}
+  ]
+};
+
+/* ---------- Canvas Zoom & Pan State ---------- */
+let canvasState = {
+  scale: 1,
+  translateX: 0,
+  translateY: 0,
+  isDragging: false,
+  lastX: 0,
+  lastY: 0,
+  isPinching: false,
+  lastDistance: 0
+};
+
+/* ---------- App State ---------- */
+const el = id => document.getElementById(id);
+let houseImage = null;
+let lastResult = null;
+let isGenerating = false;
+let mosaicGrid = null;
+
 /* ---------- Theme Switching ---------- */
 const applyTheme = (theme) => {
   if (theme === 'dark') {
@@ -1087,121 +1195,312 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
   applyTheme(newTheme);
 });
 
-/* ---------- Architectural Color Palette ---------- */
-const ARCHITECTURE_PALETTE = [
-  // Roof Colors
-  {name: "Dark Brown Roof", hex: "#582A12", type: "roof"},
-  {name: "Charcoal Gray Roof", hex: "#363636", type: "roof"},
-  {name: "Terracotta Roof", hex: "#B55239", type: "roof"},
-  {name: "Slate Gray Roof", hex: "#708090", type: "roof"},
-  // Siding Colors
-  {name: "White Siding", hex: "#FFFFFF", type: "siding"},
-  {name: "Cream Siding", hex: "#FFFDD0", type: "siding"},
-  {name: "Beige Siding", hex: "#F5F5DC", type: "siding"},
-  {name: "Light Gray Siding", hex: "#D3D3D3", type: "siding"},
-  {name: "Blue Siding", hex: "#87CEEB", type: "siding"},
-  {name: "Yellow Siding", hex: "#FFD700", type: "siding"},
-  {name: "Red Brick", hex: "#B22222", type: "siding"},
-  // Trim Colors
-  {name: "White Trim", hex: "#FFFFFF", type: "trim"},
-  {name: "Black Trim", hex: "#000000", type: "trim"},
-  {name: "Dark Gray Trim", hex: "#363636", type: "trim"},
-  {name: "Brown Trim", hex: "#8B4513", type: "trim"},
-  // Door Colors
-  {name: "Red Door", hex: "#8B0000", type: "door"},
-  {name: "Blue Door", hex: "#00008B", type: "door"},
-  {name: "Green Door", hex: "#006400", type: "door"},
-  {name: "Black Door", hex: "#000000", type: "door"},
-  {name: "White Door", hex: "#FFFFFF", type: "door"},
-  // Window Colors
-  {name: "White Window", hex: "#FFFFFF", type: "window"},
-  {name: "Black Window", hex: "#000000", type: "window"},
-  // Foundation
-  {name: "Gray Foundation", hex: "#808080", type: "foundation"},
-  {name: "Brown Foundation", hex: "#8B4513", type: "foundation"},
-  // Landscaping
-  {name: "Green Grass", hex: "#228B22", type: "landscape"},
-  {name: "Dark Green Tree", hex: "#006400", type: "landscape"},
-  {name: "Light Green Tree", hex: "#32CD32", type: "landscape"},
-  {name: "Brown Tree Trunk", hex: "#8B4513", type: "landscape"},
-  // Special Architectural
-  {name: "Gold Accent", hex: "#FFD700", type: "accent"},
-  {name: "Silver Accent", hex: "#C0C0C0", type: "accent"},
-  {name: "Copper Accent", hex: "#B87333", type: "accent"}
-];
-
-/* ---------- App State ---------- */
-const el = id => document.getElementById(id);
-let houseImage = null;
-let lastResult = null;
-let isGenerating = false;
-
 /* ---------- Initialize UI ---------- */
-// Set today's date as default for closing date
 const today = new Date().toISOString().split('T')[0];
 el('closing-date').value = today;
 
-// Update detail value display
-el('detail').addEventListener('input', e => {
-  el('detail-val').textContent = e.target.value;
+el('width').addEventListener('input', e => {
+  el('width-val').textContent = e.target.value;
 });
 
-// Handle file upload
 el('file').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
   const url = URL.createObjectURL(file);
   const img = new Image();
-  
+
   img.onload = () => {
     houseImage = img;
     URL.revokeObjectURL(url);
+    resetCanvasState();
     showPreview(img);
   };
-  
+
   img.src = url;
 });
+
+/* ---------- Canvas Controls ---------- */
+function resetCanvasState() {
+  canvasState = {
+    scale: 1,
+    translateX: 0,
+    translateY: 0,
+    isDragging: false,
+    lastX: 0,
+    lastY: 0,
+    isPinching: false,
+    lastDistance: 0
+  };
+}
+
+function applyCanvasTransform(ctx, canvas) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.translate(canvasState.translateX, canvasState.translateY);
+  ctx.scale(canvasState.scale, canvasState.scale);
+}
+
+function getDistance(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function setupCanvasControls(canvas) {
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    canvasState.scale *= delta;
+    canvasState.scale = Math.max(0.5, Math.min(5, canvasState.scale));
+    redrawCanvas();
+  }, { passive: false });
+
+  canvas.addEventListener('mousedown', (e) => {
+    canvasState.isDragging = true;
+    canvasState.lastX = e.clientX;
+    canvasState.lastY = e.clientY;
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (canvasState.isDragging) {
+      const dx = e.clientX - canvasState.lastX;
+      const dy = e.clientY - canvasState.lastY;
+      canvasState.translateX += dx;
+      canvasState.translateY += dy;
+      canvasState.lastX = e.clientX;
+      canvasState.lastY = e.clientY;
+      redrawCanvas();
+    }
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    canvasState.isDragging = false;
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    canvasState.isDragging = false;
+  });
+
+  canvas.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      canvasState.isDragging = true;
+      canvasState.lastX = e.touches[0].clientX;
+      canvasState.lastY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+      canvasState.isPinching = true;
+      canvasState.lastDistance = getDistance(e.touches);
+    }
+  }, { passive: true });
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 1 && canvasState.isDragging && !canvasState.isPinching) {
+      const dx = e.touches[0].clientX - canvasState.lastX;
+      const dy = e.touches[0].clientY - canvasState.lastY;
+      canvasState.translateX += dx;
+      canvasState.translateY += dy;
+      canvasState.lastX = e.touches[0].clientX;
+      canvasState.lastY = e.touches[0].clientY;
+      redrawCanvas();
+    } else if (e.touches.length === 2 && canvasState.isPinching) {
+      const distance = getDistance(e.touches);
+      const delta = distance / canvasState.lastDistance;
+      canvasState.scale *= delta;
+      canvasState.scale = Math.max(0.5, Math.min(5, canvasState.scale));
+      canvasState.lastDistance = distance;
+      redrawCanvas();
+    }
+  }, { passive: true });
+
+  canvas.addEventListener('touchend', (e) => {
+    if (e.touches.length === 0) {
+      canvasState.isDragging = false;
+      canvasState.isPinching = false;
+    } else if (e.touches.length === 1) {
+      canvasState.isPinching = false;
+      canvasState.lastX = e.touches[0].clientX;
+      canvasState.lastY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  el('zoom-in').addEventListener('click', () => {
+    canvasState.scale *= 1.2;
+    canvasState.scale = Math.min(5, canvasState.scale);
+    redrawCanvas();
+  });
+
+  el('zoom-out').addEventListener('click', () => {
+    canvasState.scale *= 0.8;
+    canvasState.scale = Math.max(0.5, canvasState.scale);
+    redrawCanvas();
+  });
+
+  el('reset-view').addEventListener('click', () => {
+    resetCanvasState();
+    redrawCanvas();
+  });
+}
+
+function redrawCanvas() {
+  if (mosaicGrid) {
+    renderMosaic(mosaicGrid, lastResult);
+  } else if (houseImage) {
+    showPreview(houseImage);
+  }
+}
 
 /* ---------- Show Preview ---------- */
 function showPreview(img) {
   const canvas = el('preview-canvas');
   const ctx = canvas.getContext('2d');
-  
-  // Calculate dimensions to fit canvas while maintaining aspect ratio
-  const maxWidth = canvas.width;
-  const maxHeight = canvas.height;
+
+  applyCanvasTransform(ctx, canvas);
+
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-tertiary');
+  ctx.fillRect(0, 0, canvas.width / canvasState.scale, canvas.height / canvasState.scale);
+
+  const maxWidth = canvas.width / canvasState.scale;
+  const maxHeight = canvas.height / canvasState.scale;
   let width = img.width;
   let height = img.height;
-  
+
   if (width > maxWidth) {
     height = (maxWidth / width) * height;
     width = maxWidth;
   }
-  
+
   if (height > maxHeight) {
     width = (maxHeight / height) * width;
     height = maxHeight;
   }
-  
-  // Center the image
-  const x = (canvas.width - width) / 2;
-  const y = (canvas.height - height) / 2;
-  
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-tertiary');
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const x = (canvas.width / canvasState.scale - width) / 2;
+  const y = (canvas.height / canvasState.scale - height) / 2;
+
   ctx.drawImage(img, x, y, width, height);
-  
-  // Add architectural overlay
+
   ctx.font = '16px "Work Sans"';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
   ctx.textAlign = 'center';
-  ctx.fillText('🎯 Upload Successful - Ready to Generate Model', canvas.width/2, 30);
+  ctx.fillText('🎯 Image Ready - Click Generate Mosaic', canvas.width / (2 * canvasState.scale), 30 / canvasState.scale);
 }
 
-/* ---------- Generate Architectural Model ---------- */
-async function generateModel() {
+/* ---------- Color Matching ---------- */
+function rgbToHex(r, g, b) {
+  return "#" + [r, g, b].map(x => {
+    const hex = x.toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+  }).join('');
+}
+
+function colorDistance(c1, c2) {
+  const r1 = parseInt(c1.substr(1, 2), 16);
+  const g1 = parseInt(c1.substr(3, 2), 16);
+  const b1 = parseInt(c1.substr(5, 2), 16);
+  const r2 = parseInt(c2.substr(1, 2), 16);
+  const g2 = parseInt(c2.substr(3, 2), 16);
+  const b2 = parseInt(c2.substr(5, 2), 16);
+  
+  const rDiff = r1 - r2;
+  const gDiff = g1 - g2;
+  const bDiff = b1 - b2;
+  return Math.sqrt(2 * rDiff * rDiff + 4 * gDiff * gDiff + 3 * bDiff * bDiff);
+}
+
+function findClosestColor(hexColor, palette) {
+  let minDistance = Infinity;
+  let closestColor = palette[0];
+  
+  for (const color of palette) {
+    const distance = colorDistance(hexColor, color.hex);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestColor = color;
+    }
+  }
+  
+  return closestColor;
+}
+
+/* ---------- Image to Mosaic Grid ---------- */
+function imageToMosaicGrid(img, targetWidth, palette) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  const aspectRatio = img.height / img.width;
+  const targetHeight = Math.round(targetWidth * aspectRatio);
+  
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+  
+  ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+  const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+  
+  const grid = [];
+  for (let y = 0; y < targetHeight; y++) {
+    const row = [];
+    for (let x = 0; x < targetWidth; x++) {
+      const idx = (y * targetWidth + x) * 4;
+      const r = imageData.data[idx];
+      const g = imageData.data[idx + 1];
+      const b = imageData.data[idx + 2];
+      const hex = rgbToHex(r, g, b);
+      const legoColor = findClosestColor(hex, palette);
+      row.push(legoColor);
+    }
+    grid.push(row);
+  }
+  
+  return grid;
+}
+
+/* ---------- Tile Optimization ---------- */
+function optimizeTiles(grid) {
+  const height = grid.length;
+  const width = grid[0].length;
+  const tiles = [];
+  const used = Array(height).fill(null).map(() => Array(width).fill(false));
+  
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (used[y][x]) continue;
+      
+      const color = grid[y][x];
+      let tileSize = 1;
+      
+      if (x + 2 < width && 
+          grid[y][x + 1].hex === color.hex && 
+          grid[y][x + 2].hex === color.hex &&
+          !used[y][x + 1] && !used[y][x + 2]) {
+        tileSize = 3;
+        used[y][x] = used[y][x + 1] = used[y][x + 2] = true;
+      }
+      else if (x + 1 < width && 
+               grid[y][x + 1].hex === color.hex &&
+               !used[y][x + 1]) {
+        tileSize = 2;
+        used[y][x] = used[y][x + 1] = true;
+      }
+      else {
+        tileSize = 1;
+        used[y][x] = true;
+      }
+      
+      tiles.push({
+        x: x,
+        y: y,
+        width: tileSize,
+        height: 1,
+        color: color
+      });
+    }
+  }
+  
+  return tiles;
+}
+
+/* ---------- Generate Mosaic ---------- */
+async function generateMosaic() {
   if (!houseImage) {
     alert("Please upload a house photo first.");
     return;
@@ -1209,278 +1508,647 @@ async function generateModel() {
 
   if (isGenerating) return;
   isGenerating = true;
-  
-  // Show loading
+
   el('loading').style.display = 'flex';
-  
+
   try {
-    // Simulate processing delay (in real app, this would be actual image processing)
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const detailLevel = parseInt(el('detail').value);
-    const style = el('style').value;
-    const baseSize = el('base-size').value;
-    const includeTrees = el('include-trees').checked;
-    const includeFence = el('include-fence').checked;
-    
-    // Generate mock architectural model data
-    const modelData = generateMockArchitecturalModel(detailLevel, style, includeTrees, includeFence);
-    
-    // Update UI with results
-    updateModelStats(modelData);
-    renderArchitecturalPreview(modelData);
-    updateBOMTable(modelData);
-    
-    // Show order button
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const mosaicWidth = parseInt(el('width').value);
+    const paletteName = el('palette').value;
+    const palette = LEGO_PALETTES[paletteName];
+    const optimize = el('optimize-tiles').checked;
+
+    const grid = imageToMosaicGrid(houseImage, mosaicWidth, palette);
+    mosaicGrid = grid;
+
+    let tiles;
+    if (optimize) {
+      tiles = optimizeTiles(grid);
+    } else {
+      tiles = [];
+      for (let y = 0; y < grid.length; y++) {
+        for (let x = 0; x < grid[0].length; x++) {
+          tiles.push({
+            x: x,
+            y: y,
+            width: 1,
+            height: 1,
+            color: grid[y][x]
+          });
+        }
+      }
+    }
+
+    const result = {
+      grid: grid,
+      tiles: tiles,
+      width: grid[0].length,
+      height: grid.length,
+      totalTiles: tiles.length,
+      clientName: el('client-name').value || 'The Johnson Family',
+      propertyAddress: el('property-address').value || '123 Maple Street',
+      closingDate: el('closing-date').value,
+      realtorName: el('realtor-name').value || 'Your Realty Company'
+    };
+
+    lastResult = result;
+
+    updateMosaicStats(result);
+    resetCanvasState();
+    renderMosaic(grid, result);
+    updateBOMTable(result);
+
     el('order').style.display = 'flex';
-    
-    lastResult = modelData;
-    
+    el('stats-panel').style.display = 'block';
+
   } catch (error) {
-    console.error('Error generating model:', error);
-    alert('Error generating model. Please try again with a different image.');
+    console.error('Error generating mosaic:', error);
+    alert('Error generating mosaic. Please try again.');
   } finally {
     isGenerating = false;
     el('loading').style.display = 'none';
   }
 }
 
-/* ---------- Generate Mock Architectural Data ---------- */
-function generateMockArchitecturalModel(detailLevel, style, includeTrees, includeFence) {
-  const baseSizes = {
-    '8x8': { bricks: 500, width: 8, weight: 2.5 },
-    '12x12': { bricks: 1200, width: 12, weight: 6 },
-    '16x16': { bricks: 2200, width: 16, weight: 11 },
-    '20x20': { bricks: 3500, width: 20, weight: 17.5 }
-  };
-  
-  const baseSize = el('base-size').value;
-  const baseStats = baseSizes[baseSize];
-  
-  // Adjust brick count based on detail level
-  const brickMultiplier = 0.5 + (detailLevel * 0.1);
-  const totalBricks = Math.round(baseStats.bricks * brickMultiplier);
-  
-  // Generate mock BOM
-  const bom = [
-    { component: 'Roof Tiles', color: ARCHITECTURE_PALETTE.find(c => c.type === 'roof' && c.name.includes('Brown')).hex, quantity: Math.round(totalBricks * 0.25) },
-    { component: 'Siding', color: ARCHITECTURE_PALETTE.find(c => c.type === 'siding' && c.name.includes('White')).hex, quantity: Math.round(totalBricks * 0.35) },
-    { component: 'Windows', color: ARCHITECTURE_PALETTE.find(c => c.type === 'window' && c.name.includes('White')).hex, quantity: Math.round(totalBricks * 0.15) },
-    { component: 'Door', color: ARCHITECTURE_PALETTE.find(c => c.type === 'door' && c.name.includes('Red')).hex, quantity: Math.round(totalBricks * 0.05) },
-    { component: 'Foundation', color: ARCHITECTURE_PALETTE.find(c => c.type === 'foundation' && c.name.includes('Gray')).hex, quantity: Math.round(totalBricks * 0.1) },
-    { component: 'Trim', color: ARCHITECTURE_PALETTE.find(c => c.type === 'trim' && c.name.includes('White')).hex, quantity: Math.round(totalBricks * 0.1) }
-  ];
-  
-  if (includeTrees) {
-    bom.push({ component: 'Trees', color: ARCHITECTURE_PALETTE.find(c => c.type === 'landscape' && c.name.includes('Dark Green')).hex, quantity: 12 });
-    bom.push({ component: 'Tree Trunks', color: ARCHITECTURE_PALETTE.find(c => c.type === 'landscape' && c.name.includes('Brown')).hex, quantity: 12 });
-    bom.push({ component: 'Grass', color: ARCHITECTURE_PALETTE.find(c => c.type === 'landscape' && c.name.includes('Green Grass')).hex, quantity: 60 });
-  }
-  
-  if (includeFence) {
-    bom.push({ component: 'Fence', color: ARCHITECTURE_PALETTE.find(c => c.type === 'trim' && c.name.includes('White')).hex, quantity: 40 });
-  }
-  
-  return {
-    totalBricks,
-    modelWidth: baseStats.width,
-    modelWeight: baseStats.weight,
-    bom,
-    style,
-    detailLevel,
-    clientName: el('client-name').value || 'The Johnson Family',
-    propertyAddress: el('property-address').value || '123 Maple Street',
-    closingDate: el('closing-date').value,
-    realtorName: el('realtor-name').value || 'Your Realty Company'
-  };
-}
-
-/* ---------- Update Model Stats ---------- */
-function updateModelStats(modelData) {
-  el('total-bricks').textContent = modelData.totalBricks.toLocaleString();
-  el('model-size').textContent = `${modelData.modelWidth}"`;
-  el('model-weight').textContent = `${modelData.modelWeight} lbs`;
-  el('stats-panel').style.display = 'block';
-}
-
-/* ---------- Render Architectural Preview ---------- */
-function renderArchitecturalPreview(modelData) {
+/* ---------- Render Mosaic ---------- */
+function renderMosaic(grid, result) {
   const canvas = el('preview-canvas');
   const ctx = canvas.getContext('2d');
-  const width = canvas.width;
-  const height = canvas.height;
-  
-  // Clear canvas
-  ctx.clearRect(0, 0, width, height);
-  
-  // Background
+
+  applyCanvasTransform(ctx, canvas);
+
+  const width = canvas.width / canvasState.scale;
+  const height = canvas.height / canvasState.scale;
+
   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-tertiary');
   ctx.fillRect(0, 0, width, height);
-  
-  // Draw architectural diagram
-  drawHouseDiagram(ctx, width, height, modelData);
-  
-  // Add info overlay
-  ctx.font = 'bold 18px "Work Sans"';
+
+  const gridWidth = grid[0].length;
+  const gridHeight = grid.length;
+  const tileSize = Math.min(
+    (width - 100) / gridWidth,
+    (height - 100) / gridHeight
+  );
+
+  const startX = (width - gridWidth * tileSize) / 2;
+  const startY = (height - gridHeight * tileSize) / 2;
+
+  const showGrid = el('show-grid').checked;
+
+  for (let y = 0; y < gridHeight; y++) {
+    for (let x = 0; x < gridWidth; x++) {
+      const color = grid[y][x];
+      const px = startX + x * tileSize;
+      const py = startY + y * tileSize;
+
+      ctx.fillStyle = color.hex;
+      ctx.fillRect(px, py, tileSize, tileSize);
+
+      if (showGrid && tileSize > 3) {
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(px, py, tileSize, tileSize);
+      }
+    }
+  }
+
+  ctx.font = 'bold 16px "Work Sans"';
   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
   ctx.textAlign = 'center';
-  ctx.fillText('🏠 Architectural Model Preview', width/2, 30);
-  
-  ctx.font = '14px "Work Sans"';
+  ctx.fillText('🧱 LEGO Architectural Mosaic', width / 2, 25);
+
+  ctx.font = '12px "Work Sans"';
   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary');
-  ctx.fillText(`${modelData.style.charAt(0).toUpperCase() + modelData.style.slice(1)} Style • ${modelData.modelWidth}" Model`, width/2, 55);
+  ctx.fillText(`${gridWidth} × ${gridHeight} studs | ${result.totalTiles} tiles`, width / 2, 45);
 }
 
-function drawHouseDiagram(ctx, width, height, modelData) {
-  const centerX = width / 2;
-  const baseY = height - 100;
+/* ---------- Update Stats ---------- */
+function updateMosaicStats(result) {
+  el('total-tiles').textContent = result.totalTiles.toLocaleString();
+  el('mosaic-size').textContent = `${result.width}×${result.height}`;
   
-  // House base
-  ctx.fillStyle = ARCHITECTURE_PALETTE.find(c => c.type === 'foundation').hex;
-  ctx.fillRect(centerX - 120, baseY, 240, 20);
-  
-  // Main house
-  ctx.fillStyle = ARCHITECTURE_PALETTE.find(c => c.type === 'siding' && c.name.includes('White')).hex;
-  ctx.fillRect(centerX - 100, baseY - 150, 200, 150);
-  
-  // Roof
-  ctx.fillStyle = ARCHITECTURE_PALETTE.find(c => c.type === 'roof' && c.name.includes('Brown')).hex;
-  ctx.beginPath();
-  ctx.moveTo(centerX - 120, baseY - 150);
-  ctx.lineTo(centerX, baseY - 220);
-  ctx.lineTo(centerX + 120, baseY - 150);
-  ctx.closePath();
-  ctx.fill();
-  
-  // Windows
-  ctx.fillStyle = ARCHITECTURE_PALETTE.find(c => c.type === 'window').hex;
-  ctx.fillRect(centerX - 80, baseY - 120, 30, 40); // Left window
-  ctx.fillRect(centerX + 50, baseY - 120, 30, 40); // Right window
-  
-  // Door
-  ctx.fillStyle = ARCHITECTURE_PALETTE.find(c => c.type === 'door' && c.name.includes('Red')).hex;
-  ctx.fillRect(centerX - 20, baseY - 80, 40, 80);
-  
-  // Landscaping (if included)
-  if (modelData.bom.some(item => item.component === 'Trees')) {
-    // Trees
-    ctx.fillStyle = ARCHITECTURE_PALETTE.find(c => c.type === 'landscape' && c.name.includes('Brown Tree')).hex;
-    ctx.fillRect(centerX - 160, baseY - 40, 10, 40); // Left tree trunk
-    ctx.fillRect(centerX + 150, baseY - 40, 10, 40); // Right tree trunk
-    
-    ctx.fillStyle = ARCHITECTURE_PALETTE.find(c => c.type === 'landscape' && c.name.includes('Dark Green')).hex;
-    ctx.beginPath();
-    ctx.arc(centerX - 155, baseY - 60, 25, 0, Math.PI * 2); // Left tree top
-    ctx.arc(centerX + 155, baseY - 60, 25, 0, Math.PI * 2); // Right tree top
-    ctx.fill();
-    
-    // Grass
-    ctx.fillStyle = ARCHITECTURE_PALETTE.find(c => c.type === 'landscape' && c.name.includes('Green Grass')).hex;
-    ctx.fillRect(centerX - 200, baseY, 400, 20);
-  }
+  const uniqueColors = new Set(result.tiles.map(t => t.color.hex));
+  el('unique-colors').textContent = uniqueColors.size;
 }
 
 /* ---------- Update BOM Table ---------- */
-function updateBOMTable(modelData) {
+function updateBOMTable(result) {
   const tbody = el('bom-table').querySelector('tbody');
   tbody.innerHTML = '';
-  
-  modelData.bom.forEach(item => {
+
+  const counts = {};
+  for (const tile of result.tiles) {
+    const key = `${tile.width}x${tile.height}-${tile.color.hex}`;
+    if (!counts[key]) {
+      counts[key] = {
+        size: `1×${tile.width}`,
+        color: tile.color,
+        count: 0
+      };
+    }
+    counts[key].count++;
+  }
+
+  const sorted = Object.values(counts).sort((a, b) => {
+    const sizeA = parseInt(a.size.split('×')[1]);
+    const sizeB = parseInt(b.size.split('×')[1]);
+    if (sizeB !== sizeA) return sizeB - sizeA;
+    return b.count - a.count;
+  });
+
+  for (const item of sorted) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${item.component}</td>
-      <td><span class="color-dot" style="background:${item.hex}"></span>${getColorName(item.hex)}</td>
-      <td>${item.quantity.toLocaleString()}</td>
+      <td><strong>${item.size}</strong></td>
+      <td><span class="color-dot" style="background:${item.color.hex}"></span>${item.color.name}</td>
+      <td>${item.count.toLocaleString()}</td>
     `;
     tbody.appendChild(tr);
-  });
+  }
 }
 
-function getColorName(hex) {
-  const color = ARCHITECTURE_PALETTE.find(c => c.hex === hex);
-  return color ? color.name : 'Custom';
+/* ---------- Build Instructions Generator ---------- */
+function generateBuildInstructions() {
+  if (!lastResult) return null;
+
+  const rowsPerPage = parseInt(el('rows-per-page').value) || 10;
+  const grid = lastResult.grid;
+  const height = grid.length;
+  const width = grid[0].length;
+  
+  // Split into layers (groups of rows)
+  const layers = [];
+  for (let startRow = 0; startRow < height; startRow += rowsPerPage) {
+    const endRow = Math.min(startRow + rowsPerPage, height);
+    layers.push({
+      startRow: startRow,
+      endRow: endRow,
+      rows: grid.slice(startRow, endRow)
+    });
+  }
+
+  return {
+    layers: layers,
+    totalLayers: layers.length,
+    width: width,
+    height: height
+  };
 }
 
-/* ---------- Event Listeners ---------- */
-el('generate').addEventListener('click', generateModel);
+function createInstructionCanvas(layer, layerNum, totalLayers, width) {
+  const canvas = document.createElement('canvas');
+  const tileSize = 20; // pixels per stud
+  const margin = 60;
+  const headerHeight = 100;
+  const legendWidth = 250;
+  
+  canvas.width = width * tileSize + margin * 2 + legendWidth;
+  canvas.height = layer.rows.length * tileSize + margin * 2 + headerHeight;
+  
+  const ctx = canvas.getContext('2d');
+  
+  // Background
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Header
+  ctx.fillStyle = '#1A4D6D';
+  ctx.fillRect(0, 0, canvas.width, headerHeight);
+  
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 24px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(`LEGO Architectural Mosaic - Build Instructions`, canvas.width / 2, 35);
+  
+  ctx.font = '18px Arial';
+  ctx.fillText(`Layer ${layerNum} of ${totalLayers}`, canvas.width / 2, 60);
+  
+  ctx.font = '14px Arial';
+  ctx.fillText(`Rows ${layer.startRow + 1} to ${layer.endRow}`, canvas.width / 2, 85);
+  
+  // Grid coordinates labels
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 12px Arial';
+  ctx.textAlign = 'center';
+  
+  // Column numbers (every 5 studs)
+  for (let x = 0; x < width; x += 5) {
+    const px = margin + x * tileSize + tileSize / 2;
+    ctx.fillText((x + 1).toString(), px, headerHeight + margin - 10);
+  }
+  
+  // Row numbers
+  ctx.textAlign = 'right';
+  for (let y = 0; y < layer.rows.length; y++) {
+    const py = headerHeight + margin + y * tileSize + tileSize / 2 + 5;
+    const globalRow = layer.startRow + y + 1;
+    ctx.fillText(globalRow.toString(), margin - 10, py);
+  }
+  
+  // Draw grid with colors
+  for (let y = 0; y < layer.rows.length; y++) {
+    for (let x = 0; x < width; x++) {
+      const color = layer.rows[y][x];
+      const px = margin + x * tileSize;
+      const py = headerHeight + margin + y * tileSize;
+      
+      // Fill tile
+      ctx.fillStyle = color.hex;
+      ctx.fillRect(px, py, tileSize, tileSize);
+      
+      // Grid lines
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(px, py, tileSize, tileSize);
+    }
+  }
+  
+  // Color legend
+  const usedColors = new Map();
+  for (const row of layer.rows) {
+    for (const color of row) {
+      if (!usedColors.has(color.hex)) {
+        usedColors.set(color.hex, color);
+      }
+    }
+  }
+  
+  const legendX = margin + width * tileSize + 30;
+  let legendY = headerHeight + margin;
+  
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 14px Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText('Color Legend:', legendX, legendY);
+  
+  legendY += 25;
+  ctx.font = '12px Arial';
+  
+  for (const [hex, color] of usedColors) {
+    // Color swatch
+    ctx.fillStyle = hex;
+    ctx.fillRect(legendX, legendY - 10, 20, 20);
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(legendX, legendY - 10, 20, 20);
+    
+    // Color name
+    ctx.fillStyle = '#000000';
+    ctx.fillText(color.name, legendX + 30, legendY + 5);
+    
+    legendY += 30;
+  }
+  
+  return canvas;
+}
 
-el('order').addEventListener('click', () => {
-  if (!lastResult) return alert("Please generate a model first.");
-  
-  const clientName = el('client-name').value || 'Client';
-  alert(`🎉 Thank you for your order!\n\nA premium architectural model for ${clientName} has been added to your cart.\n\nTotal: $249 (including shipping and custom plaque)\n\nEstimated delivery: 5-7 business days`);
-});
+/* ---------- PDF Generation ---------- */
+async function generatePDFInstructions() {
+  if (!lastResult) {
+    alert("Please generate a mosaic first.");
+    return;
+  }
 
-el('downloadPNG').addEventListener('click', () => {
-  if (!lastResult) return alert("Please generate a model first.");
+  el('loading').style.display = 'flex';
   
-  const link = document.createElement('a');
-  link.download = `blockforge-architectural-model-${lastResult.style}.png`;
-  link.href = el('preview-canvas').toDataURL();
-  link.click();
-});
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'px',
+      format: [1200, 900]
+    });
 
-el('downloadCSV').addEventListener('click', () => {
-  if (!lastResult) return alert("Please generate a model first.");
-  
-  let csv = "component,color_hex,color_name,quantity\n";
-  lastResult.bom.forEach(item => {
-    csv += `"${item.component}","${item.hex}","${getColorName(item.hex)}",${item.quantity}\n`;
-  });
-  
-  const blob = new Blob([csv], {type: 'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'architectural-model-parts-list.csv';
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 100);
-});
+    const instructions = generateBuildInstructions();
+    
+    // Title Page
+    pdf.setFillColor(26, 77, 109);
+    pdf.rect(0, 0, 1200, 900, 'F');
+    
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(48);
+    pdf.text('LEGO Architectural Mosaic', 600, 200, { align: 'center' });
+    
+    pdf.setFontSize(32);
+    pdf.text('Build Instructions', 600, 260, { align: 'center' });
+    
+    pdf.setFontSize(20);
+    pdf.text(`${lastResult.clientName}`, 600, 350, { align: 'center' });
+    pdf.text(`${lastResult.propertyAddress}`, 600, 380, { align: 'center' });
+    pdf.text(`${lastResult.width} × ${lastResult.height} studs`, 600, 450, { align: 'center' });
+    pdf.text(`${lastResult.totalTiles} tiles`, 600, 480, { align: 'center' });
+    
+    pdf.setFontSize(16);
+    pdf.text(`Realtor: ${lastResult.realtorName}`, 600, 550, { align: 'center' });
+    pdf.text(`Closing Date: ${lastResult.closingDate}`, 600, 580, { align: 'center' });
+    
+    // Layer Instructions
+    for (let i = 0; i < instructions.layers.length; i++) {
+      pdf.addPage();
+      
+      const layer = instructions.layers[i];
+      const canvas = createInstructionCanvas(layer, i + 1, instructions.totalLayers, instructions.width);
+      const imgData = canvas.toDataURL('image/png');
+      
+      pdf.addImage(imgData, 'PNG', 50, 50, 1100, canvas.height * (1100 / canvas.width));
+      
+      // Instructions text
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(14);
+      const textY = 50 + canvas.height * (1100 / canvas.width) + 30;
+      pdf.text(`Start from the left side of row ${layer.startRow + 1}.`, 60, textY);
+      pdf.text(`Work left to right, placing tiles according to the color grid above.`, 60, textY + 25);
+      pdf.text(`Use grid coordinates to locate specific tiles: Column (top) × Row (left).`, 60, textY + 50);
+    }
+    
+    // Final Page - Parts List
+    pdf.addPage();
+    pdf.setFillColor(26, 77, 109);
+    pdf.rect(0, 0, 1200, 100, 'F');
+    
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(32);
+    pdf.text('Parts List', 600, 60, { align: 'center' });
+    
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(14);
+    
+    const counts = {};
+    for (const tile of lastResult.tiles) {
+      const key = `${tile.width}x${tile.height}-${tile.color.hex}`;
+      if (!counts[key]) {
+        counts[key] = {
+          size: `1×${tile.width}`,
+          color: tile.color,
+          count: 0
+        };
+      }
+      counts[key].count++;
+    }
+    
+    const sorted = Object.values(counts).sort((a, b) => {
+      const sizeA = parseInt(a.size.split('×')[1]);
+      const sizeB = parseInt(b.size.split('×')[1]);
+      if (sizeB !== sizeA) return sizeB - sizeA;
+      return b.count - a.count;
+    });
+    
+    let y = 150;
+    let x = 60;
+    let column = 0;
+    
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Tile Size', x, y);
+    pdf.text('Color', x + 100, y);
+    pdf.text('Quantity', x + 300, y);
+    
+    y += 30;
+    pdf.setFont('helvetica', 'normal');
+    
+    for (const item of sorted) {
+      if (y > 850) {
+        column++;
+        if (column >= 3) {
+          pdf.addPage();
+          column = 0;
+          y = 150;
+        } else {
+          x = 460;
+          y = 150;
+          pdf.setFont('helvetica', 'bold');
+          pdf.text('Tile Size', x, y);
+          pdf.text('Color', x + 100, y);
+          pdf.text('Quantity', x + 300, y);
+          y += 30;
+          pdf.setFont('helvetica', 'normal');
+        }
+      }
+      
+      pdf.setFillColor(parseInt(item.color.hex.substr(1, 2), 16), 
+                       parseInt(item.color.hex.substr(3, 2), 16), 
+                       parseInt(item.color.hex.substr(5, 2), 16));
+      pdf.rect(x, y - 12, 20, 20, 'F');
+      pdf.setDrawColor(0);
+      pdf.rect(x, y - 12, 20, 20, 'S');
+      
+      pdf.text(item.size, x + 30, y);
+      pdf.text(item.color.name, x + 100, y);
+      pdf.text(item.count.toString(), x + 300, y);
+      
+      y += 30;
+    }
+    
+    pdf.save(`blockforge-mosaic-instructions-${lastResult.width}x${lastResult.height}.pdf`);
+    
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    alert('Error generating PDF instructions. Please try again.');
+  } finally {
+    el('loading').style.display = 'none';
+  }
+}
 
-el('downloadInstructions').addEventListener('click', () => {
-  if (!lastResult) return alert("Please generate a model first.");
-  
-  const instructions = `
-BLOCKFORGE ARCHITECTURAL MODEL
-===============================
+function generateTextInstructions() {
+  if (!lastResult) return '';
+
+  const instructions = generateBuildInstructions();
+  let text = `BLOCKFORGE ARCHITECTURAL MOSAIC - BUILD INSTRUCTIONS
+${'='.repeat(60)}
+
+CLIENT INFORMATION:
+${'-'.repeat(60)}
 Client: ${lastResult.clientName}
 Property: ${lastResult.propertyAddress}
 Closing Date: ${lastResult.closingDate}
 Realtor: ${lastResult.realtorName}
 
-MODEL SPECIFICATIONS:
----------------------
-• Style: ${lastResult.style.charAt(0).toUpperCase() + lastResult.style.slice(1)}
-• Size: ${lastResult.modelWidth} inches wide
-• Total Bricks: ${lastResult.totalBricks.toLocaleString()}
-• Weight: ${lastResult.modelWeight} lbs
+MOSAIC SPECIFICATIONS:
+${'-'.repeat(60)}
+• Dimensions: ${lastResult.width} × ${lastResult.height} studs
+• Total Tiles: ${lastResult.totalTiles.toLocaleString()}
+• Total Layers: ${instructions.totalLayers}
+• Tile Types: 1×3, 1×2, 1×1
 
 BUILD INSTRUCTIONS:
--------------------
-1. Start with the foundation base
-2. Build walls layer by layer
-3. Install windows and doors
-4. Add roof structure
-5. Install landscaping elements
-6. Attach custom plaque
+${'-'.repeat(60)}
 
-For detailed step-by-step instructions with diagrams,
-visit: https://blockforge.com/instructions/${lastResult.style}
+GENERAL GUIDELINES:
+1. Start from the bottom-left corner (Row 1, Column 1)
+2. Build row by row, working left to right
+3. Use grid coordinates (Column × Row) to locate tiles
+4. Press tiles firmly onto baseplate
+5. Work in sections for large mosaics
+6. Take breaks on large builds
 
-Need help? Contact support@blockforge.com
-  `;
+`;
+
+  // Layer-by-layer instructions
+  for (let i = 0; i < instructions.layers.length; i++) {
+    const layer = instructions.layers[i];
+    text += `\nLAYER ${i + 1} of ${instructions.totalLayers}:
+${'-'.repeat(60)}
+Rows: ${layer.startRow + 1} to ${layer.endRow}
+Number of rows in this layer: ${layer.rows.length}
+
+Instructions:
+1. Locate row ${layer.startRow + 1} on your baseplate (counting from bottom)
+2. Start at the left edge (Column 1)
+3. Place tiles according to the color chart
+4. Work left to right across each row
+5. Complete all rows in this layer before moving to the next layer
+
+Color usage in this layer:
+`;
+
+    // Count colors in this layer
+    const layerColors = new Map();
+    for (const row of layer.rows) {
+      for (const color of row) {
+        const count = layerColors.get(color.name) || 0;
+        layerColors.set(color.name, count + 1);
+      }
+    }
+
+    for (const [colorName, count] of layerColors) {
+      text += `  • ${colorName}: ${count} tiles\n`;
+    }
+
+    text += '\n';
+  }
+
+  text += `\nPARTS LIST:
+${'-'.repeat(60)}
+`;
+
+  const counts = {};
+  for (const tile of lastResult.tiles) {
+    const key = `${tile.width}x${tile.height}-${tile.color.hex}`;
+    if (!counts[key]) {
+      counts[key] = {
+        size: `1×${tile.width}`,
+        color: tile.color,
+        count: 0
+      };
+    }
+    counts[key].count++;
+  }
+
+  const sorted = Object.values(counts).sort((a, b) => {
+    const sizeA = parseInt(a.size.split('×')[1]);
+    const sizeB = parseInt(b.size.split('×')[1]);
+    if (sizeB !== sizeA) return sizeB - sizeA;
+    return b.count - a.count;
+  });
+
+  text += 'Tile Size | Color Name           | Quantity\n';
+  text += '-'.repeat(60) + '\n';
+  for (const item of sorted) {
+    const sizePadded = item.size.padEnd(9);
+    const colorPadded = item.color.name.padEnd(20);
+    const countStr = item.count.toString();
+    text += `${sizePadded} | ${colorPadded} | ${countStr}\n`;
+  }
+
+  text += `\n\nTIPS FOR BEST RESULTS:
+${'-'.repeat(60)}
+• Use a large, flat baseplate as your foundation
+• Organize tiles by color before starting
+• Good lighting helps with color identification
+• Work at a comfortable pace
+• Display with proper lighting for best effect
+• Consider mounting on a display board or frame
+
+NEED HELP?
+${'-'.repeat(60)}
+For detailed instructions with color-coded diagrams:
+Visit: https://blockforge.com/mosaic-instructions
+
+For support:
+Email: support@blockforge.com
+Phone: 1-800-BLOCKFORGE
+
+Thank you for choosing BlockForge!
+`;
+
+  return text;
+}
+
+/* ---------- Event Listeners ---------- */
+el('generate').addEventListener('click', generateMosaic);
+
+el('order').addEventListener('click', () => {
+  if (!lastResult) return alert("Please generate a mosaic first.");
+
+  const clientName = el('client-name').value || 'Client';
+  alert(`🎉 Thank you for your order!\n\nA premium architectural mosaic for ${clientName} has been added to your cart.\n\nTotal: $249 (including shipping and custom plaque)\n\nEstimated delivery: 5-7 business days`);
+});
+
+el('downloadPNG').addEventListener('click', () => {
+  if (!lastResult) return alert("Please generate a mosaic first.");
+
+  const link = document.createElement('a');
+  link.download = `blockforge-architectural-mosaic-${lastResult.width}x${lastResult.height}.png`;
+  link.href = el('preview-canvas').toDataURL();
+  link.click();
+});
+
+el('downloadCSV').addEventListener('click', () => {
+  if (!lastResult) return alert("Please generate a mosaic first.");
+
+  let csv = "tile_size,color_name,color_hex,quantity\n";
   
-  const blob = new Blob([instructions], {type: 'text/plain'});
+  const counts = {};
+  for (const tile of lastResult.tiles) {
+    const key = `${tile.width}x${tile.height}-${tile.color.hex}`;
+    if (!counts[key]) {
+      counts[key] = {
+        size: `1x${tile.width}`,
+        color: tile.color,
+        count: 0
+      };
+    }
+    counts[key].count++;
+  }
+
+  for (const item of Object.values(counts)) {
+    csv += `"${item.size}","${item.color.name}","${item.color.hex}",${item.count}\n`;
+  }
+
+  const blob = new Blob([csv], {type: 'text/csv'});
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'architectural-model-instructions.txt';
+  link.download = 'architectural-mosaic-parts-list.csv';
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 100);
 });
 
-/* ---------- Initialize Animations ---------- */
+el('downloadInstructions').addEventListener('click', async () => {
+  if (!lastResult) return alert("Please generate a mosaic first.");
+
+  const format = el('instructions-format').value;
+
+  if (format === 'pdf' || format === 'both') {
+    await generatePDFInstructions();
+  }
+
+  if (format === 'txt' || format === 'both') {
+    const instructions = generateTextInstructions();
+    const blob = new Blob([instructions], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `architectural-mosaic-instructions-${lastResult.width}x${lastResult.height}.txt`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  }
+});
+
+/* ---------- Initialize ---------- */
 document.addEventListener('DOMContentLoaded', () => {
+  setupCanvasControls(el('preview-canvas'));
+
   const cards = document.querySelectorAll('.value-card, .panel');
   cards.forEach((card, index) => {
     setTimeout(() => {
